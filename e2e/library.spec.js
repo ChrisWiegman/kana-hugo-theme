@@ -163,5 +163,5 @@ test("sitemap uses latest finished date for library", async ({ request }) => {
     /<loc>[^<]*\/library\/<\/loc>\s*<lastmod>([^<]+)<\/lastmod>/,
   );
   expect(libraryMatch).not.toBeNull();
-  expect(libraryMatch[1]).toMatch(/^2026-01-18T/);
+  expect(libraryMatch[1]).toMatch(/^2026-05-28T/);
 });
