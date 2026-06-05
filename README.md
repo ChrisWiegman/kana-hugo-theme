@@ -242,7 +242,7 @@ Features:
 - **Notes** — short-form content with its own RSS feed
 - **Responsive images** — automatic WebP conversion, srcset generation, lazy loading
 - **Syntax highlighting** — Gruvbox theme, collapsible blocks, filename labels
-- **SEO** — Open Graph, Twitter Cards, Schema.org, Fediverse creator meta tag, canonical URLs
+- **SEO** — Open Graph, Twitter Cards, Schema.org, Fediverse creator meta tag, canonical URLs, JSON-LD
 - **RSS** — site-wide feed plus a per-section feed for notes
 - **Sitemap** and **robots.txt** included
 
