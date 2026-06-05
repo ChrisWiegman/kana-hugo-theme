@@ -81,6 +81,7 @@ The `JSON` output on `home` is required for client-side search to work.
 | `imageSizeString` | string | The HTML `sizes` attribute for responsive images. Must be ordered **smallest breakpoint first** with no-condition default last (e.g. `"(max-width: 300px) 300w, (max-width: 710px) 710w, 850w"`) |
 | `OpenGraph` | bool | Emit Open Graph meta tags |
 | `TwitterCards` | bool | Emit Twitter Card meta tags |
+| `jsonld` | bool | Emit JSON-LD meta tags |
 | `FediverseCreator` | string | Fediverse handle for `fediverse:creator` meta tag (e.g. `"@user@instance.social"`) |
 | `MobileWebAppTitle` | string | `apple-mobile-web-app-title` meta value |
 | `policies` | string | Path to a policies page linked in the footer |
