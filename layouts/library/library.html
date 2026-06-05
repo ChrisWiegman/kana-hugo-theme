@@ -92,7 +92,7 @@
 			{{- end -}}
 			{{- $yearRows = sort $yearRows "year" "desc" -}}
 
-			{{/* ---- Summary: top 10 authors ---- */}}
+			{{/* ---- Summary: top 12 authors ---- */}}
 			{{- $authorCounts := dict -}}
 			{{- $authorNames := dict -}}
 			{{- range $rows -}}
@@ -181,7 +181,7 @@
 					hidden>View All</button>
 			</h2>
 
-			<div class="books" data-library-table>
+			<div class="books" data-library-table data-page-size="{{ default 25 site.Params.pagerSize }}">
 				<div class="book-header">
 					<button type="button" class="book-sort" data-sort="title" aria-sort="none">Title</button>
 					<button type="button" class="book-sort" data-sort="author" aria-sort="none">Author</button>

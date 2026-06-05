@@ -1,5 +1,16 @@
 @import "components/variables.scss";
 
+main {
+    .prevnext {
+        padding-top: 0;
+        display: flex;
+
+        &[hidden] {
+            display: none;
+        }
+    }
+}
+
 .library {
     .content-header {
         padding: 0;

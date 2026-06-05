@@ -10,6 +10,8 @@
     const getRows = () => Array.from(root.querySelectorAll(".book"));
 
     const STORAGE_KEY = "librarySort:v1";
+    const PAGE_SIZE = parseInt(root.dataset.pageSize, 10) || 25;
+    let currentPage = 0;
 
     const labelFor = (key) => {
         switch (key) {
@@ -25,7 +27,6 @@
         const av = a.dataset[key] ?? "";
         const bv = b.dataset[key] ?? "";
 
-        // Numeric sorts with stable tie-breaker by title
         if (key === "rating" || key === "finished") {
             const an = Number(av) || 0;
             const bn = Number(bv) || 0;
@@ -37,7 +38,6 @@
             return at.localeCompare(bt, undefined, { numeric: true, sensitivity: "base" });
         }
 
-        // String sorts with stable tie-breaker by title
         const diff = dir * av.localeCompare(bv, undefined, { numeric: true, sensitivity: "base" });
         if (diff !== 0) return diff;
 
@@ -81,11 +81,67 @@
         }
     };
 
+    // ---- Pagination ----
+
+    const nav = document.createElement("nav");
+    nav.className = "navigation prevnext";
+    nav.setAttribute("aria-label", "Library pagination");
+    nav.hidden = true;
+    root.after(nav);
+
+    const applyPagination = () => {
+        const allRows = getRows();
+        const activeRows = allRows.filter(r => !r.hidden);
+        const totalPages = Math.ceil(activeRows.length / PAGE_SIZE);
+
+        currentPage = Math.max(0, Math.min(currentPage, Math.max(0, totalPages - 1)));
+
+        const start = currentPage * PAGE_SIZE;
+        const end = start + PAGE_SIZE;
+        const pageSet = new Set(activeRows.slice(start, end));
+
+        allRows.forEach(row => {
+            row.style.display = (!row.hidden && !pageSet.has(row)) ? "none" : "";
+        });
+
+        nav.hidden = totalPages <= 1;
+        if (totalPages > 1) {
+            nav.innerHTML = "";
+            if (currentPage > 0) {
+                const prev = document.createElement("a");
+                prev.href = "#";
+                prev.className = "prev";
+                prev.textContent = "← Previous Books";
+                prev.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    currentPage--;
+                    applyPagination();
+                    root.scrollIntoView({ behavior: "smooth", block: "start" });
+                });
+                nav.appendChild(prev);
+            }
+            if (currentPage < totalPages - 1) {
+                const next = document.createElement("a");
+                next.href = "#";
+                next.className = "next";
+                next.textContent = "More Books →";
+                next.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    currentPage++;
+                    applyPagination();
+                    root.scrollIntoView({ behavior: "smooth", block: "start" });
+                });
+                nav.appendChild(next);
+            }
+        }
+    };
+
+    // ---- Sort ----
+
     const applySort = (key, dir) => {
         const btn = buttons.find(b => b.dataset.sort === key) || null;
         const rows = getRows().sort(compare(key, dir));
 
-        // Faster re-append (single DOM append)
         const frag = document.createDocumentFragment();
         rows.forEach(row => frag.appendChild(row));
         root.appendChild(frag);
@@ -93,9 +149,9 @@
         setAria(btn, dir);
         updateHint(key, dir);
         saveState(key, dir);
+        applyPagination();
     };
 
-    // Sort click handlers
     let activeKey = null;
     let dir = 1;
 
@@ -110,8 +166,9 @@
         });
     });
 
-    // Unified filter
-    let activeFilter = null; // { type: 'year' | 'author' | 'rating', value: string }
+    // ---- Filter ----
+
+    let activeFilter = null;
     const countEl = document.querySelector(".book-count");
     const totalCount = getRows().length;
     const clearBtn = document.querySelector("[data-filter-clear]");
@@ -201,6 +258,9 @@
             countEl.textContent = count;
             countEl.nextSibling.textContent = count === 1 ? " book" : " books";
         }
+
+        currentPage = 0;
+        applyPagination();
     };
 
     const setFilter = (type, value) => {

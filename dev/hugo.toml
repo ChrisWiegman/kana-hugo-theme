@@ -13,6 +13,7 @@ theme = "kana-hugo-theme"
 themesDir = "../.."
 
 [params]
+pagerSize = 25
 mainSections = ["posts"]
 OpenGraph = true
 TwitterCards = true
@@ -35,7 +36,7 @@ link = "https://github.com/ChrisWiegman/kana-hugo-theme/blob/main/LICENSE.txt"
 minifyOutput = false
 
 [pagination]
-pagerSize = 10
+pagerSize = 25
 
 [html]
 keepDefaultAttrVals = false
