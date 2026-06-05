@@ -99,10 +99,8 @@
 				{{- if ne .author "" -}}
 					{{- $key := .authorKey -}}
 					{{- $authorNames = merge $authorNames (dict $key .author) -}}
-					{{- range .finishedRaw -}}
-						{{- $current := (index $authorCounts $key | default 0) -}}
-						{{- $authorCounts = merge $authorCounts (dict $key (add $current 1)) -}}
-					{{- end -}}
+					{{- $current := (index $authorCounts $key | default 0) -}}
+					{{- $authorCounts = merge $authorCounts (dict $key (add $current 1)) -}}
 				{{- end -}}
 			{{- end -}}
 
