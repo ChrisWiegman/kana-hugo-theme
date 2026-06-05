@@ -76,3 +76,7 @@ screenshots: install
 test: install
 	npx playwright install
 	npm run e2e
+
+.PHONY: lint
+lint:
+	npm run lint
