@@ -12,6 +12,7 @@ node_modules/
 /dev/public
 /dev/resources
 /dev/.hugo_build.lock
+.public/
 
 # ignore Platwright test files
 /test-results
