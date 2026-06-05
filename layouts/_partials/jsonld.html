@@ -1,0 +1,23 @@
+{{- $ISO8601 := "2006-01-02T15:04:05-07:00" -}}
+{{- $data := dict -}}
+{{- if .IsHome -}}
+{{- $data = dict "@context" "https://schema.org" "@type" "WebSite" "name" .Site.Title "url" .Site.BaseURL -}}
+{{- with .Site.Params.description -}}{{- $data = merge $data (dict "description" .) -}}{{- end -}}
+{{- else if and .IsPage (eq .Section "posts") -}}
+{{- $hasDesc := and (isset .Params "description") (ne (trim .Params.description " ") "") -}}
+{{- $description := cond $hasDesc .Params.description (.Summary | plainify | truncate 160) -}}
+{{- $data = dict "@context" "https://schema.org" "@type" "BlogPosting" "headline" (.Title | plainify) "url" .Permalink "description" $description -}}
+{{- with .Date -}}{{- $data = merge $data (dict "datePublished" (.Format $ISO8601)) -}}{{- end -}}
+{{- with .Lastmod -}}{{- $data = merge $data (dict "dateModified" (.Format $ISO8601)) -}}{{- end -}}
+{{- with .Site.Params.author -}}{{- $data = merge $data (dict "author" (dict "@type" "Person" "name" .)) -}}{{- end -}}
+{{- with index .Params.images 0 -}}{{- $data = merge $data (dict "image" (. | absURL)) -}}{{- end -}}
+{{- with .Params.tags -}}{{- $data = merge $data (dict "keywords" (delimit . ", ")) -}}{{- end -}}
+{{- else if .IsPage -}}
+{{- $hasDesc := and (isset .Params "description") (ne (trim .Params.description " ") "") -}}
+{{- $description := cond $hasDesc .Params.description (.Summary | plainify | truncate 160) -}}
+{{- $data = dict "@context" "https://schema.org" "@type" "WebPage" "name" (.Title | plainify) "url" .Permalink "description" $description -}}
+{{- with .Site.Params.author -}}{{- $data = merge $data (dict "author" (dict "@type" "Person" "name" .)) -}}{{- end -}}
+{{- end -}}
+{{- with $data -}}
+{{- printf "<script type=\"application/ld+json\">%s</script>" (. | jsonify) | safeHTML }}
+{{- end -}}
