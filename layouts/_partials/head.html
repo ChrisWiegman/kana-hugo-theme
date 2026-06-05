@@ -67,4 +67,6 @@
 {{- if .Site.Params.TwitterCards -}}
 {{- partial "twitter_cards.html" . -}}
 {{- end -}}
+{{- if .Site.Params.jsonld -}}
 {{- partial "jsonld.html" . -}}
+{{- end -}}
