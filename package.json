@@ -27,11 +27,11 @@
     "lint": "eslint ./assets/scripts"
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0",
-    "changie": "^1.24.0",
+    "@playwright/test": "^1.61.1",
+    "changie": "^1.25.0",
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "eslint": "^10.4.1",
-    "globals": "^17.6.0"
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0"
   }
 }
