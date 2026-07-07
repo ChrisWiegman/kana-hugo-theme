@@ -13,7 +13,6 @@
 			{{- end }}
 		{{- end }}
 		{{ range $index, $post := first 10 $posts }}
-			{{ .Render "title" }}
 			{{ partial "post-item.html" (dict "post" $post "dateFormat" "2 Jan") }}
 		{{- end }}
 	</div>
