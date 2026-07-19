@@ -7,4 +7,8 @@ links:
   amazon: ""
   openlibrary: ""
   goodreads: ""
+reference:
+  isbn: ""
+  asin: ""
+cover: ""
 ---
