@@ -14,8 +14,8 @@
 >
     <channel>
         <language>{{ site.Language.Locale | default "en-US" }}</language>
-        <title>{{ if eq .Title .Site.Title }}{{ .Site.Title }}{{ else }}{{ with .Title }}{{.}} on {{
-        end }}{{ .Site.Title }}{{ end }}</title>
+        <title>{{ if eq .Title .Site.Title }}{{ .Site.Title }}{{ else }}{{ .Site.Title }}{{ with .Title }} - {{.}}{{
+        end }}{{ end }}</title>
         <link>{{- .Site.BaseURL -}}</link>
         {{ with .OutputFormats.Get "RSS" -}}
             <atom:link href="{{ .Permalink }}" rel="self" type="{{ .MediaType.Type }}" />

@@ -12,7 +12,7 @@
 >
     <channel>
         <language>{{ site.Language.Locale | default "en-US" }}</language>
-        <title>{{ with .Title }}{{ . }} on {{ end }}{{ .Site.Title }}</title>
+        <title>{{ .Site.Title }}{{ with .Title }} - {{ . }}{{ end }}</title>
         <link>{{- .Permalink -}}</link>
         {{ with .OutputFormats.Get "RSS" -}}
             <atom:link href="{{ .Permalink }}" rel="self" type="{{ .MediaType.Type }}" />
