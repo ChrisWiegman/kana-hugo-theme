@@ -28,10 +28,10 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
-    "changie": "^1.25.1",
+    "changie": "^1.25.2",
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
     "eslint": "^10.8.0",
-    "globals": "^17.8.0"
+    "globals": "^17.9.0"
   }
 }
