@@ -1,0 +1,3 @@
+kind: Features
+body: Library book list now loads progressively, appending more books to the bottom of the list as you scroll instead of paginating.
+time: 2026-08-04T18:34:27.159878-05:00
