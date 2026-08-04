@@ -175,6 +175,8 @@ goodreads   = "https://www.goodreads.com/..."
 
 The library page supports filtering by year finished, author, and star rating, plus sorting by title, author, rating, or date. A statistics panel shows books read per year, top authors, and rating distribution.
 
+Books load progressively: an initial batch is shown (controlled by `site.Params.pagerSize`, default 25), and further batches append to the bottom of the list as you scroll, with a "Load More Books" link as a fallback trigger. Changing a sort or filter starts back at the first batch.
+
 Add a `content/library.md` page with `layout: library` to activate it.
 
 ### Search

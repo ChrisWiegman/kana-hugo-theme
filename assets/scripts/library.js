@@ -13,7 +13,7 @@
 
 	const STORAGE_KEY = 'librarySort:v1';
 	const PAGE_SIZE = parseInt(root.dataset.pageSize, 10) || 25;
-	let currentPage = 0;
+	let visibleCount = PAGE_SIZE;
 
 	const labelFor = (key) => {
 		switch (key) {
@@ -95,65 +95,80 @@
 		}
 	};
 
-	// ---- Pagination ----
+	// ---- Pagination (progressive loading) ----
 
 	const nav = document.createElement('nav');
 
 	nav.className = 'navigation prevnext';
-	nav.setAttribute('aria-label', 'Library pagination');
+	nav.setAttribute('aria-label', 'Load more books');
 	nav.hidden = true;
 	root.after(nav);
+
+	let loadMoreObserver = null;
+
+	const loadMore = () => {
+		const activeRows = getRows().filter((r) => !r.hidden);
+
+		if (visibleCount >= activeRows.length) return;
+
+		visibleCount += PAGE_SIZE;
+		applyPagination();
+	};
+
+	const observeLoadMore = (target) => {
+		if (loadMoreObserver) loadMoreObserver.disconnect();
+
+		loadMoreObserver = new IntersectionObserver((entries) => {
+			if (entries[0].isIntersecting) loadMore();
+		}, { rootMargin: '600px 0px' });
+
+		loadMoreObserver.observe(target);
+	};
 
 	const applyPagination = () => {
 		const allRows = getRows();
 		const activeRows = allRows.filter((r) => !r.hidden);
-		const totalPages = Math.ceil(activeRows.length / PAGE_SIZE);
 
-		currentPage = Math.max(0, Math.min(currentPage, Math.max(0, totalPages - 1)));
+		visibleCount = Math.min(Math.max(visibleCount, PAGE_SIZE), activeRows.length);
 
-		const start = currentPage * PAGE_SIZE;
-		const end = start + PAGE_SIZE;
-		const pageSet = new Set(activeRows.slice(start, end));
+		const visibleSet = new Set(activeRows.slice(0, visibleCount));
 
 		allRows.forEach((row) => {
-			row.style.display = (!row.hidden && !pageSet.has(row)) ? 'none' : '';
+			row.style.display = (!row.hidden && !visibleSet.has(row)) ? 'none' : '';
 		});
 
-		nav.hidden = totalPages <= 1;
+		const remaining = activeRows.length - visibleCount;
 
-		if (totalPages > 1) {
-			nav.innerHTML = '';
+		nav.innerHTML = '';
 
-			if (currentPage > 0) {
-				const prev = document.createElement('a');
+		if (remaining > 0) {
+			nav.hidden = false;
 
-				prev.href = '#';
-				prev.className = 'prev';
-				prev.textContent = '← Previous Books';
-				prev.addEventListener('click', (e) => {
-					e.preventDefault();
-					currentPage--;
-					applyPagination();
-					root.scrollIntoView({ behavior: 'smooth', block: 'start' });
-				});
-				nav.appendChild(prev);
-			}
+			const next = document.createElement('a');
 
-			if (currentPage < totalPages - 1) {
-				const next = document.createElement('a');
+			next.href = '#';
+			next.className = 'next';
+			next.textContent = 'Load More Books ↓';
+			next.addEventListener('click', (e) => {
+				e.preventDefault();
+				loadMore();
+			});
+			nav.appendChild(next);
 
-				next.href = '#';
-				next.className = 'next';
-				next.textContent = 'More Books →';
-				next.addEventListener('click', (e) => {
-					e.preventDefault();
-					currentPage++;
-					applyPagination();
-					root.scrollIntoView({ behavior: 'smooth', block: 'start' });
-				});
-				nav.appendChild(next);
+			observeLoadMore(next);
+		} else {
+			nav.hidden = true;
+
+			if (loadMoreObserver) {
+				loadMoreObserver.disconnect();
+				loadMoreObserver = null;
 			}
 		}
+	};
+
+	const resetPagination = () => {
+		visibleCount = PAGE_SIZE;
+		applyPagination();
 	};
 
 	// ---- Sort ----
@@ -288,8 +303,7 @@
 			countEl.nextSibling.textContent = count === 1 ? ' book' : ' books';
 		}
 
-		currentPage = 0;
-		applyPagination();
+		resetPagination();
 	};
 
 	const setFilter = (type, value) => {
