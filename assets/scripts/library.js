@@ -1,289 +1,176 @@
 (() => {
-	const root = document.querySelector('[data-library-table]');
+	const table = document.querySelector('[data-library-table]');
 
-	if (!root) return;
+	if (!table) return;
 
-	const header = root.querySelector('.book-header');
-
-	if (!header) return;
-
+	const rows = [...table.querySelectorAll('.book')];
+	const sortButtons = [...table.querySelectorAll('.book-sort')];
+	const count = document.querySelector('.book-count');
+	const clear = document.querySelector('[data-filter-clear]');
+	const filterLabel = document.querySelector('[data-filter-label]');
 	const hint = document.querySelector('[data-sort-hint]');
-	const buttons = Array.from(header.querySelectorAll('.book-sort'));
-	const getRows = () => Array.from(root.querySelectorAll('.book'));
+	const pageSize = Number(table.dataset.pageSize) || 25;
+	const storageKey = 'librarySort:v1';
+	let visible = pageSize;
+	let activeFilter;
 
-	const STORAGE_KEY = 'librarySort:v1';
-	const PAGE_SIZE = parseInt(root.dataset.pageSize, 10) || 25;
-	let visibleCount = PAGE_SIZE;
+	const filters = {
+		year: {
+			matches: (row, value) => row.dataset.years.split(' ').includes(value),
+			label: (value) => ` read in ${value}`,
+		},
+		author: {
+			matches: (row, value) => row.dataset.author === value,
+			label: (value) => {
+				const button = document.querySelector(`.book-author[data-filter-author="${CSS.escape(value)}"]`);
 
-	const LABELS = { title: 'Title', author: 'Author', rating: 'Rating', finished: 'Finished' };
-	const labelFor = (key) => LABELS[key] || key;
-
-	const titleOf = (row) => row.dataset.title ?? '';
-	const compareText = (a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-
-	const compare = (key, dir) => (a, b) => {
-		const av = a.dataset[key] ?? '';
-		const bv = b.dataset[key] ?? '';
-
-		const diff = (key === 'rating' || key === 'finished')
-			? dir * ((Number(av) || 0) - (Number(bv) || 0))
-			: dir * compareText(av, bv);
-
-		return diff !== 0 ? diff : compareText(titleOf(a), titleOf(b));
+				return button ? ` by ${button.textContent.trim()}` : '';
+			},
+		},
+		rating: {
+			matches: (row, value) => row.dataset.rating === value,
+			label: (value) => ` rated ${'★'.repeat(value)}${'☆'.repeat(5 - value)}`,
+		},
 	};
 
-	const setAria = (activeBtn, dir) => {
-		buttons.forEach((btn) => btn.setAttribute('aria-sort', 'none'));
-
-		if (activeBtn) activeBtn.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
-	};
-
-	const HINT_EXTRA = {
-		finished: (dir) => (dir === -1 ? 'newest first' : 'oldest first'),
-		rating: (dir) => (dir === -1 ? 'highest first' : 'lowest first'),
-	};
-
-	const updateHint = (key, dir) => {
-		if (!hint) return;
-
-		const extra = HINT_EXTRA[key] ? HINT_EXTRA[key](dir) : (dir === 1 ? 'ascending' : 'descending');
-
-		hint.innerHTML = `Sorted by <strong>${labelFor(key)}</strong> (${extra}). Click a column to change.`;
-	};
-
-	const saveState = (key, dir) => {
-		try {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify({ key, dir }));
-		} catch { /* empty */ }
-	};
-
-	const loadState = () => {
-		try {
-			const raw = localStorage.getItem(STORAGE_KEY);
-
-			if (!raw) return null;
-
-			const parsed = JSON.parse(raw);
-
-			return (parsed && parsed.key && parsed.dir) ? parsed : null;
-		} catch {
-			return null;
-		}
-	};
-
-	// ---- Pagination (progressive loading) ----
+	const filterButtons = Object.keys(filters).flatMap((type) =>
+		[...document.querySelectorAll(`[data-filter-${type}]`)].map((button) => ({ button, type })),
+	);
 
 	const nav = document.createElement('nav');
+	const more = document.createElement('a');
 
 	nav.className = 'navigation prevnext';
 	nav.setAttribute('aria-label', 'Load more books');
-	nav.hidden = true;
-	root.after(nav);
+	more.href = '#';
+	more.className = 'next';
+	more.textContent = 'Load More Books ↓';
+	nav.appendChild(more);
+	table.after(nav);
 
-	let loadMoreObserver = null;
+	const renderRows = () => {
+		const matching = rows.filter((row) => !row.hidden);
+
+		visible = Math.min(visible, matching.length);
+		matching.forEach((row, index) => {
+			row.style.display = index < visible ? '' : 'none';
+		});
+		nav.hidden = visible >= matching.length;
+	};
 
 	const loadMore = () => {
-		const activeRows = getRows().filter((r) => !r.hidden);
-
-		if (visibleCount >= activeRows.length) return;
-
-		visibleCount += PAGE_SIZE;
-		applyPagination();
+		visible += pageSize;
+		renderRows();
 	};
 
-	const observeLoadMore = (target) => {
-		if (loadMoreObserver) loadMoreObserver.disconnect();
-
-		loadMoreObserver = new IntersectionObserver((entries) => {
-			if (entries[0].isIntersecting) loadMore();
-		}, { rootMargin: '600px 0px' });
-
-		loadMoreObserver.observe(target);
-	};
-
-	const applyPagination = () => {
-		const allRows = getRows();
-		const activeRows = allRows.filter((r) => !r.hidden);
-
-		visibleCount = Math.min(Math.max(visibleCount, PAGE_SIZE), activeRows.length);
-
-		const visibleSet = new Set(activeRows.slice(0, visibleCount));
-
-		allRows.forEach((row) => {
-			row.style.display = (!row.hidden && !visibleSet.has(row)) ? 'none' : '';
-		});
-
-		const remaining = activeRows.length - visibleCount;
-
-		nav.innerHTML = '';
-
-		if (remaining <= 0) {
-			nav.hidden = true;
-
-			if (loadMoreObserver) {
-				loadMoreObserver.disconnect();
-				loadMoreObserver = null;
-			}
-
-			return;
-		}
-
-		nav.hidden = false;
-
-		const next = document.createElement('a');
-
-		next.href = '#';
-		next.className = 'next';
-		next.textContent = 'Load More Books ↓';
-		next.addEventListener('click', (e) => {
-			e.preventDefault();
-			loadMore();
-		});
-		nav.appendChild(next);
-
-		observeLoadMore(next);
-	};
-
-	const resetPagination = () => {
-		visibleCount = PAGE_SIZE;
-		applyPagination();
-	};
-
-	// ---- Sort ----
-
-	const applySort = (key, dir) => {
-		const btn = buttons.find((b) => b.dataset.sort === key) || null;
-		const rows = getRows().sort(compare(key, dir));
-
-		const frag = document.createDocumentFragment();
-
-		rows.forEach((row) => frag.appendChild(row));
-		root.appendChild(frag);
-
-		setAria(btn, dir);
-		updateHint(key, dir);
-		saveState(key, dir);
-		applyPagination();
-	};
-
-	let activeKey = null;
-	let dir = 1;
-
-	buttons.forEach((btn) => {
-		btn.addEventListener('click', () => {
-			const key = btn.dataset.sort;
-
-			if (key === activeKey) dir *= -1;
-			else {
-				activeKey = key; dir = 1;
-			}
-
-			applySort(activeKey, dir);
-		});
+	more.addEventListener('click', (event) => {
+		event.preventDefault();
+		loadMore();
 	});
 
-	// ---- Filter ----
+	new IntersectionObserver((entries) => {
+		if (entries[0].isIntersecting && !nav.hidden) loadMore();
+	}, { rootMargin: '600px 0px' }).observe(more);
 
-	const FILTER_TYPES = ['year', 'author', 'rating'];
-
-	const FILTER_MATCHERS = {
-		year: (row, value) => (row.dataset.years || '').split(' ').includes(value),
-		author: (row, value) => row.dataset.author === value,
-		rating: (row, value) => row.dataset.rating === value,
-	};
-
-	const FILTER_LABELS = {
-		year: (value) => ` read in ${value}`,
-		author: (value) => {
-			const rowBtn = document.querySelector(`.book-author[data-filter-author="${CSS.escape(value)}"]`);
-
-			return rowBtn ? ` by ${rowBtn.textContent.trim()}` : '';
-		},
-		rating: (value) => {
-			const n = Number(value);
-
-			return ` rated ${'★'.repeat(n)}${'☆'.repeat(5 - n)}`;
-		},
-	};
-
-	const filterButtons = new Map(
-		FILTER_TYPES.map((type) => [type, Array.from(document.querySelectorAll(`[data-filter-${type}]`))]),
-	);
-
-	let activeFilter = null;
-	const countEl = document.querySelector('.book-count');
-	const totalCount = getRows().length;
-	const clearBtn = document.querySelector('[data-filter-clear]');
-	const filterLabel = document.querySelector('[data-filter-label]');
-
-	const syncFilterUI = () => {
-		FILTER_TYPES.forEach((type) => {
-			filterButtons.get(type).forEach((btn) => {
-				const active = activeFilter?.type === type && btn.getAttribute(`data-filter-${type}`) === activeFilter.value;
-
-				btn.setAttribute('aria-pressed', String(active));
-			});
+	const renderFilter = () => {
+		rows.forEach((row) => {
+			row.hidden = activeFilter ? !filters[activeFilter.type].matches(row, activeFilter.value) : false;
+		});
+		filterButtons.forEach(({ button, type }) => {
+			button.setAttribute('aria-pressed', String(activeFilter?.type === type
+				&& button.dataset[`filter${type[0].toUpperCase()}${type.slice(1)}`] === activeFilter.value));
 		});
 
-		if (countEl?.previousSibling?.nodeType === Node.TEXT_NODE) {
-			countEl.previousSibling.textContent = activeFilter ? 'You\'re viewing ' : 'You\'re viewing all ';
+		const matching = rows.filter((row) => !row.hidden).length;
+
+		if (count) {
+			count.textContent = matching;
+			count.nextSibling.textContent = matching === 1 ? ' book' : ' books';
+
+			if (count.previousSibling?.nodeType === Node.TEXT_NODE) {
+				count.previousSibling.textContent = activeFilter ? 'You\'re viewing ' : 'You\'re viewing all ';
+			}
 		}
 
 		if (filterLabel) {
-			filterLabel.textContent = activeFilter ? FILTER_LABELS[activeFilter.type](activeFilter.value) : '';
+			filterLabel.textContent = activeFilter ? filters[activeFilter.type].label(activeFilter.value) : '';
 			filterLabel.hidden = !activeFilter;
 		}
 
-		if (clearBtn) clearBtn.hidden = !activeFilter;
+		if (clear) clear.hidden = !activeFilter;
+
+		visible = pageSize;
+		renderRows();
 	};
 
-	const applyFilter = () => {
-		getRows().forEach((row) => {
-			row.hidden = activeFilter ? !FILTER_MATCHERS[activeFilter.type](row, activeFilter.value) : false;
+	filterButtons.forEach(({ button, type }) => {
+		button.addEventListener('click', () => {
+			const value = button.getAttribute(`data-filter-${type}`);
+
+			activeFilter = activeFilter?.type === type && activeFilter.value === value
+				? undefined
+				: { type, value };
+			renderFilter();
 		});
-
-		if (countEl) {
-			const count = activeFilter ? getRows().filter((r) => !r.hidden).length : totalCount;
-
-			countEl.textContent = count;
-			countEl.nextSibling.textContent = count === 1 ? ' book' : ' books';
-		}
-
-		resetPagination();
-	};
-
-	const setFilter = (type, value) => {
-		activeFilter = (activeFilter?.type === type && activeFilter?.value === value)
-			? null
-			: { type, value };
-		syncFilterUI();
-		applyFilter();
-	};
-
-	FILTER_TYPES.forEach((type) => {
-		filterButtons.get(type).forEach((btn) =>
-			btn.addEventListener('click', () => setFilter(type, btn.getAttribute(`data-filter-${type}`))),
-		);
 	});
 
-	if (clearBtn) {
-		clearBtn.addEventListener('click', () => {
-			activeFilter = null;
-			syncFilterUI();
-			applyFilter();
+	clear?.addEventListener('click', () => {
+		activeFilter = undefined;
+		renderFilter();
+	});
+
+	const compare = (key, direction) => (a, b) => {
+		const numeric = key === 'rating' || key === 'finished';
+		const difference = numeric
+			? Number(a.dataset[key]) - Number(b.dataset[key])
+			: a.dataset[key].localeCompare(b.dataset[key], undefined, { numeric: true, sensitivity: 'base' });
+
+		return direction * difference || a.dataset.title.localeCompare(b.dataset.title);
+	};
+
+	const saveSort = (sort) => {
+		try {
+			localStorage.setItem(storageKey, JSON.stringify(sort));
+		} catch { /* Storage may be unavailable. */ }
+	};
+
+	const applySort = (key, direction) => {
+		const button = sortButtons.find((item) => item.dataset.sort === key);
+
+		rows.sort(compare(key, direction)).forEach((row) => table.appendChild(row));
+		sortButtons.forEach((item) => item.setAttribute('aria-sort', 'none'));
+		button?.setAttribute('aria-sort', direction === 1 ? 'ascending' : 'descending');
+
+		if (hint) {
+			const descriptions = {
+				finished: direction === -1 ? 'newest first' : 'oldest first',
+				rating: direction === -1 ? 'highest first' : 'lowest first',
+			};
+			const description = descriptions[key] || (direction === 1 ? 'ascending' : 'descending');
+
+			hint.innerHTML = `Sorted by <strong>${button?.textContent || key}</strong> (${description}). Click a column to change.`;
+		}
+
+		saveSort({ key, dir: direction });
+		renderRows();
+	};
+
+	let sort = { key: 'finished', dir: -1 };
+
+	try {
+		const saved = JSON.parse(localStorage.getItem(storageKey));
+
+		if (saved?.key && saved.dir) sort = saved;
+	} catch { /* Keep the default sort. */ }
+
+	sortButtons.forEach((button) => {
+		button.addEventListener('click', () => {
+			const key = button.dataset.sort;
+
+			sort = { key, dir: key === sort.key ? -sort.dir : 1 };
+			applySort(sort.key, sort.dir);
 		});
-	}
+	});
 
-	// Default sort: Finished (descending), but restore saved sort if present
-	const saved = loadState();
-
-	if (saved) {
-		activeKey = saved.key;
-		dir = saved.dir;
-	} else {
-		activeKey = 'finished';
-		dir = -1;
-	}
-
-	applySort(activeKey, dir);
+	applySort(sort.key, sort.dir);
 })();
