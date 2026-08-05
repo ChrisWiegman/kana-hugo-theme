@@ -5,8 +5,7 @@
 // Note styles: only needed on the notes list page
 article.note {
   display: flow-root;
-  margin-left: -1rem;
-  margin-right: -1rem;
+  margin: 0 -1rem;
   padding: 0.4rem 1rem;
   color: $text;
 

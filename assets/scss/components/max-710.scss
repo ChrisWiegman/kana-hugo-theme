@@ -1,10 +1,4 @@
 @media screen and (max-width: 710px) {
-
-  .prevnext,
-  .container {
-    padding: 1rem;
-  }
-
   header,
   footer {
     padding-left: 0.2rem;
@@ -14,11 +8,10 @@
     a {
       padding: 0.2rem 0.4rem;
     }
-  }
 
-  header img,
-  footer img {
-    display: none;
+    img {
+      display: none;
+    }
   }
 
   footer {
@@ -31,46 +24,45 @@
     }
   }
 
-  .home .content-search form,
-  .page .content-search form {
-    grid-template-columns: auto;
-  }
-
-  .home main .hero,
-  .page main .hero {
-    padding: 0;
-
-    .container .content {
-      align-items: flex-start;
-      flex-direction: column;
-      display: flex;
-
-      .intro {
-        order: 2;
-
-        h1 {
-          font-size: 1.5rem;
-          margin-bottom: 1rem;
-        }
-
-        p {
-          font-size: 1rem;
-        }
-      }
-
-      img {
-        order: 1;
-        max-width: 50%;
-        margin: 0 auto 1.5rem auto;
-      }
+  .home,
+  .page {
+    .content-search form {
+      grid-template-columns: auto;
     }
-  }
 
-  .home main,
-  .page main {
-    article {
+    main {
+      .hero {
+        padding: 0;
+
+        .container .content {
+          align-items: flex-start;
+          flex-direction: column;
+          display: flex;
+
+          .intro {
+            order: 2;
+
+            h1 {
+              font-size: 1.5rem;
+              margin-bottom: 1rem;
+            }
+
+            p {
+              font-size: 1rem;
+            }
+          }
+
+          img {
+            order: 1;
+            max-width: 50%;
+            margin: 0 auto 1.5rem;
+          }
+        }
+      }
+
+      article {
         .content-header {
-          padding: 0 0 2rem 0;
+          padding: 0 0 2rem;
 
           .meta {
             padding: 0.4rem 0;
@@ -101,8 +93,9 @@
         }
       }
 
-    .description {
-      font-size: 1rem;
+      .description {
+        font-size: 1rem;
+      }
     }
   }
 }

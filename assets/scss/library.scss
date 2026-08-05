@@ -1,520 +1,419 @@
 @import "components/variables.scss";
 
-main {
-    .prevnext {
-        padding-top: 0;
-        display: flex;
-
-        &[hidden] {
-            display: none;
-        }
-    }
-}
+main .prevnext[hidden] { display: none; }
 
 .library {
-    .content-header {
-        padding: 0;
+  .content-header { padding: 0; }
+
+  .library-summary {
+    margin: 1.5rem 0 2rem;
+
+    .summary-section-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin: 1.2rem 0 0.5rem;
+
+      &:first-of-type {
+        margin-top: 0.4rem;
+      }
     }
 
-    .library-summary {
-        margin: 1.5rem 0 2rem 0;
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.8rem;
+      margin-top: 0.4rem;
+    }
 
-        .summary-section-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.07em;
-            text-transform: uppercase;
-            opacity: 0.6;
-            margin: 1.2rem 0 0.5rem 0;
+    .summary-grid-authors {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
 
-            &:first-of-type {
-                margin-top: 0.4rem;
-            }
-        }
+    .summary-card {
+      all: unset;
+      display: block;
+      box-sizing: border-box;
+      border: 1px solid $border-light;
+      border-radius: 10px;
+      padding: 0.8rem 0.9rem;
+      background: $dark-opacity;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 120ms ease, background 120ms ease;
 
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 0.8rem;
-            margin-top: 0.4rem;
-        }
+      &:hover {
+        border-color: $link;
+        color: $text-bright;
+      }
 
-        .summary-grid-authors {
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        }
-
-        .summary-card {
-            all: unset;
-            display: block;
-            box-sizing: border-box;
-            border: 1px solid $border-light;
-            border-radius: 10px;
-            padding: 0.8rem 0.9rem;
-            background: $dark-opacity;
-            cursor: pointer;
-            text-align: left;
-            transition: border-color 120ms ease, background 120ms ease;
-
-            &:hover {
-                border-color: $link;
-                color: $text-bright;
-            }
-
-            &[aria-pressed="true"] {
-                border-color: $link;
-                background: $link;
-                color: $background;
-
-                .summary-year,
-                .summary-name,
-                .summary-stars,
-                .summary-count,
-                .summary-label {
-                    color: $background;
-                    opacity: 1;
-                }
-            }
-
-            &:focus-visible {
-                outline: 2px solid $link;
-                outline-offset: 2px;
-            }
-        }
+      &[aria-pressed="true"] {
+        border-color: $link;
+        background: $link;
+        color: $background;
 
         .summary-year,
         .summary-name,
-        .summary-stars {
-            font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .summary-name {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .summary-stars {
-            letter-spacing: 0.05em;
-        }
-
-        .summary-count {
-            font-size: 1.6rem;
-            font-weight: 700;
-            line-height: 1;
-        }
-
+        .summary-stars,
+        .summary-count,
         .summary-label {
-            opacity: 0.75;
-            font-size: 0.85rem;
-            margin-top: 0.25rem;
+          color: $background;
+          opacity: 1;
         }
+      }
+
+      &:focus-visible {
+        outline: 2px solid $link;
+        outline-offset: 2px;
+      }
     }
 
-    .filter-clear {
+    .summary-year,
+    .summary-name,
+    .summary-stars {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .summary-stars {
+      letter-spacing: 0.05em;
+    }
+
+    .summary-count {
+      font-size: 1.6rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .summary-label {
+      opacity: 0.75;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+  }
+
+  .filter-clear {
+    all: unset;
+    font-size: 1rem;
+    color: $link;
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      color: $primary;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $link;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+
+  .books {
+    margin-top: 0;
+
+    .book-header,
+    .book {
+      display: grid;
+      grid-template-columns: minmax(240px, 2fr) minmax(180px, 1.4fr) 120px 1fr 140px;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .book-header {
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.3rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-bottom: 1px solid $border-light;
+
+      .book-links-header {
+        grid-column: 4;
+      }
+
+      .book-sort {
         all: unset;
-        font-size: 1rem;
-        color: $link;
-        text-decoration: underline;
-        cursor: pointer;
+        font: inherit;
+        color: inherit;
+        line-height: inherit;
 
         &:hover {
-            color: $primary;
+          border-radius: 8px;
+          background: $dark-opacity;
+          color: $text-bright;
+          cursor: pointer;
+        }
+
+        &[aria-sort="ascending"]::after {
+          content: " ↑";
+          opacity: 0.6;
+        }
+
+        &[aria-sort="descending"]::after {
+          content: " ↓";
+          opacity: 0.6;
         }
 
         &:focus-visible {
-            outline: 2px solid $link;
-            outline-offset: 2px;
-            border-radius: 2px;
+          outline: 2px solid $link;
+          outline-offset: 2px;
+          border-radius: 2px;
         }
+      }
+
+      .book-links-header,
+      .book-sort {
+        padding: 0.2rem 0.4rem;
+        border: 1px solid transparent;
+        cursor: default;
+      }
     }
 
-    .books {
-        margin-top: 0;
-
-        // Keep layout intact on small screens without brittle reflow rules
-        // (866 rows: consistent columns matter more than clever stacking)
-        @media (max-width: 760px) {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-
-            .book-header,
-            .book {
-                min-width: 740px;
-            }
-        }
-
-        .book-header,
-        .book {
-            display: grid;
-            grid-template-columns: minmax(240px, 2fr) minmax(180px, 1.4fr) 120px 1fr 140px;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .book-header {
-            padding-bottom: 0.4rem;
-            margin-bottom: 0.3rem;
-
-            font-size: 0.75rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-
-            border-bottom: 1px solid $border-light;
-
-            // Plain label for Links (not interactive)
-            .book-links-header {
-                grid-column: 4;
-                padding: 0.2rem 0.4rem;
-                border: 1px solid transparent;
-                cursor: default;
-            }
-
-            // Only buttons are interactive
-            .book-sort {
-                all: unset;
-                font: inherit;
-                color: inherit;
-                line-height: inherit;
-
-                padding: 0.2rem 0.4rem;
-                border: 1px solid transparent;
-                cursor: default;
-
-                &:hover {
-                    border-radius: 8px;
-                    background: $dark-opacity;
-                    color: $text-bright;
-                    cursor: pointer;
-                }
-
-                &[aria-sort="ascending"]::after {
-                    content: " ↑";
-                    opacity: 0.6;
-                }
-
-                &[aria-sort="descending"]::after {
-                    content: " ↓";
-                    opacity: 0.6;
-                }
-
-                &:focus-visible {
-                    outline: 2px solid $link;
-                    outline-offset: 2px;
-                    border-radius: 2px;
-                }
-            }
-        }
-
-        .book[hidden] {
-            display: none !important;
-        }
-
-        .book {
-            grid-template-rows: auto auto;
-            gap: 0.25rem 1rem;
-
-            margin: 0 -1rem 1rem -1rem;
-            padding: 0.4rem 1rem;
-
-            border: 1px solid transparent;
-            border-radius: 8px;
-
-            color: $text;
-            transition: background 120ms ease, color 120ms ease;
-
-            &:hover {
-                background: $dark-opacity;
-                color: $text-bright;
-            }
-
-            .book-meta {
-                font-size: 0.8rem;
-                font-weight: 400;
-            }
-
-            .book-title {
-                grid-column: 1 / -1;
-                grid-row: 1;
-                font-size: 1.2rem;
-                font-weight: 600;
-                margin: 0;
-                padding: 0;
-                color: $text;
-            }
-
-            .book-author {
-                grid-column: 2;
-                grid-row: 2;
-                background: none;
-                border: none;
-                padding: 0;
-                font: inherit;
-                color: inherit;
-                text-align: left;
-                cursor: pointer;
-
-                &:hover {
-                    color: $text-bright;
-                }
-
-                &[aria-pressed="true"] {
-                    color: $link;
-                    font-weight: 600;
-                }
-
-                &:focus-visible {
-                    outline: 2px solid $link;
-                    outline-offset: 2px;
-                    border-radius: 2px;
-                }
-            }
-
-            .book-rating {
-                grid-column: 3;
-                grid-row: 2;
-                white-space: nowrap;
-                letter-spacing: 0.1em;
-                background: none;
-                border: none;
-                padding: 0;
-                font: inherit;
-                color: inherit;
-                cursor: pointer;
-
-                &:hover {
-                    color: $text-bright;
-                }
-
-                &[aria-pressed="true"] {
-                    color: $link;
-                }
-
-                &:focus-visible {
-                    outline: 2px solid $link;
-                    outline-offset: 2px;
-                    border-radius: 2px;
-                }
-            }
-
-            .book-links {
-                grid-column: 4;
-                grid-row: 2;
-                display: flex;
-                flex-direction: column;
-                gap: 0;
-
-                a {
-                    padding: 0.05rem 0;
-                    border-bottom: none;
-                    white-space: nowrap;
-                }
-            }
-
-            .book-date {
-                grid-column: 5;
-                grid-row: 2;
-                opacity: 0.8;
-                line-height: 1.3;
-
-                display: flex;
-                flex-direction: column;
-                gap: 0;
-
-                .date {
-                    display: block;
-                    padding: 0.05rem 0;
-                    white-space: nowrap;
-                }
-
-                .date-empty {
-                    opacity: 0.5;
-                }
-            }
-        }
+    .book[hidden] {
+      display: none !important;
     }
+
+    .book {
+      grid-template-rows: auto auto;
+      gap: 0.25rem 1rem;
+      margin: 0 -1rem 1rem;
+      padding: 0.4rem 1rem;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: $text;
+      transition: background 120ms ease, color 120ms ease;
+
+      &:hover {
+        background: $dark-opacity;
+        color: $text-bright;
+      }
+
+      .book-meta {
+        font-size: 0.8rem;
+        font-weight: 400;
+      }
+
+      .book-title {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+        padding: 0;
+        color: $text;
+      }
+
+      .book-author,
+      .book-rating {
+        background: none;
+        border: none;
+        padding: 0;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        grid-row: 2;
+
+        &:hover {
+          color: $text-bright;
+        }
+
+        &[aria-pressed="true"] {
+          color: $link;
+        }
+
+        &:focus-visible {
+          outline: 2px solid $link;
+          outline-offset: 2px;
+          border-radius: 2px;
+        }
+      }
+
+      .book-author {
+        grid-column: 2;
+        text-align: left;
+
+        &[aria-pressed="true"] {
+          font-weight: 600;
+        }
+      }
+
+      .book-rating {
+        grid-column: 3;
+        white-space: nowrap;
+        letter-spacing: 0.1em;
+      }
+
+      .book-links,
+      .book-date {
+        grid-row: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .book-links {
+        grid-column: 4;
+
+        a {
+          padding: 0.05rem 0;
+          border-bottom: none;
+          white-space: nowrap;
+        }
+      }
+
+      .book-date {
+        grid-column: 5;
+        opacity: 0.8;
+        line-height: 1.3;
+
+        .date {
+          display: block;
+          padding: 0.05rem 0;
+          white-space: nowrap;
+        }
+
+        .date-empty {
+          opacity: 0.5;
+        }
+      }
+    }
+  }
 }
 
 @media (max-width: 768px) {
-    .library {
+  .library {
+    .library-summary {
+      margin: 1rem 0 1.25rem;
 
-        // Slightly tighten the summary on mobile
-        .library-summary {
-            margin: 1rem 0 1.25rem 0;
+      .summary-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.6rem;
+      }
 
-            .summary-grid {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                gap: 0.6rem;
-            }
+      .summary-grid-authors {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
 
-            .summary-grid-authors {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            }
+      .summary-card {
+        padding: 0.6rem 0.7rem;
+      }
 
-            .summary-card {
-                padding: 0.6rem 0.7rem;
-            }
-
-            .summary-count {
-                font-size: 1.4rem;
-            }
-        }
-
-        .books {
-            // Reflow layout instead of forcing horizontal scroll
-            overflow-x: visible;
-
-            .book-header {
-                display: grid;
-                grid-template-columns: minmax(0, 1fr) auto;
-                grid-template-rows: auto auto;
-                gap: 0.35rem 0.75rem;
-
-                padding: 0.35rem 0;
-                margin-bottom: 0.6rem;
-
-                // Make sure it never exceeds the container width
-                width: 100%;
-                max-width: 100%;
-                box-sizing: border-box;
-                min-width: 0;
-
-                .book-links-header {
-                    display: none;
-                }
-
-                // Let header controls shrink/wrap instead of forcing width
-                .book-sort {
-                    min-width: 0;
-                    max-width: 100%;
-                    white-space: normal; // allow wrapping if needed
-                    overflow-wrap: anywhere;
-                }
-
-                .book-sort[data-sort="title"] {
-                    grid-column: 1 / -1;
-                    grid-row: 1;
-                    justify-self: start;
-
-                    // If title button text is long, allow it to wrap
-                    line-height: 1.2;
-                }
-
-                .book-sort[data-sort="author"] {
-                    grid-column: 1;
-                    grid-row: 2;
-                    justify-self: start;
-                }
-
-                .book-sort[data-sort="rating"] {
-                    grid-column: 2;
-                    grid-row: 1;
-                    justify-self: start;
-
-                    // Rating label should stay compact
-                    white-space: nowrap;
-                }
-
-                // Optional: keep finished hidden on mobile
-                .book-sort[data-sort="finished"] {
-                    grid-column: 2;
-                    grid-row: 2;
-                    justify-self: start;
-                }
-            }
-
-            .book {
-                // Mobile row layout:
-                // Row 1: Title (full width)
-                // Row 2: Author (left) | Rating (right)
-                // Row 3: Links (left)  | Finished (right)
-                display: grid;
-                grid-template-columns: 1fr auto;
-                grid-template-rows: auto auto auto;
-                gap: 0.35rem 0.75rem;
-
-                margin: 0 -0.75rem 0.75rem -0.75rem;
-                padding: 0.65rem 0.75rem;
-
-                // Critical for wrapping inside CSS grid
-                min-width: 0;
-
-                .book-title {
-                    grid-column: 1 / -1;
-                    grid-row: 1;
-
-                    font-size: 1.05rem;
-                    line-height: 1.25;
-
-                    // Hard “wrap no matter what”
-                    white-space: normal !important;
-                    overflow-wrap: anywhere;
-                    word-break: break-word; // Safari safety
-                    hyphens: auto;
-
-                    // Grid shrink fix
-                    min-width: 0;
-                    max-width: 100%;
-                }
-
-                .book-author {
-                    grid-column: 1;
-                    grid-row: 2;
-                    justify-self: start;
-
-                    min-width: 0;
-                    white-space: normal;
-                    overflow-wrap: anywhere;
-                    background: none;
-                    border: none;
-                    padding: 0;
-                    font: inherit;
-                    color: inherit;
-                    text-align: left;
-                    cursor: pointer;
-                }
-
-                .book-rating {
-                    grid-column: 2;
-                    grid-row: 2;
-                    justify-self: end;
-                    white-space: nowrap;
-                    background: none;
-                    border: none;
-                    padding: 0;
-                    font: inherit;
-                    color: inherit;
-                    cursor: pointer;
-                }
-
-                .book-links {
-                    grid-column: 1;
-                    grid-row: 3;
-                    min-width: 0;
-
-                    a {
-                        white-space: normal;
-                        overflow-wrap: anywhere;
-                        word-break: break-word;
-                        padding: 0.1rem 0;
-                    }
-                }
-
-                .book-date {
-                    grid-column: 2;
-                    grid-row: 3;
-                    justify-self: end;
-                    align-items: flex-end;
-                    text-align: right;
-                    min-width: 0;
-
-                    .date {
-                        padding: 0;
-                        white-space: nowrap;
-                    }
-                }
-            }
-        }
+      .summary-count {
+        font-size: 1.4rem;
+      }
     }
+
+    .books {
+      .book-header {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: auto auto;
+        gap: 0.35rem 0.75rem;
+        padding: 0.35rem 0;
+        margin-bottom: 0.6rem;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
+
+        .book-links-header {
+          display: none;
+        }
+
+        .book-sort {
+          grid-column: 2;
+          grid-row: 2;
+          justify-self: start;
+          min-width: 0;
+          max-width: 100%;
+          white-space: normal;
+          overflow-wrap: anywhere;
+
+          &[data-sort="title"] {
+            grid-column: 1 / -1;
+            grid-row: 1;
+            line-height: 1.2;
+          }
+
+          &[data-sort="author"] {
+            grid-column: 1;
+          }
+
+          &[data-sort="rating"] {
+            grid-row: 1;
+            white-space: nowrap;
+          }
+        }
+      }
+
+      .book {
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto auto;
+        gap: 0.35rem 0.75rem;
+        margin: 0 -0.75rem 0.75rem;
+        padding: 0.65rem 0.75rem;
+        min-width: 0;
+
+        .book-title {
+          font-size: 1.05rem;
+          line-height: 1.25;
+          white-space: normal !important;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          hyphens: auto;
+          min-width: 0;
+          max-width: 100%;
+        }
+
+        .book-author {
+          grid-column: 1;
+          justify-self: start;
+          min-width: 0;
+          white-space: normal;
+          overflow-wrap: anywhere;
+        }
+
+        .book-rating {
+          grid-column: 2;
+          justify-self: end;
+        }
+
+        .book-links {
+          grid-column: 1;
+          grid-row: 3;
+          min-width: 0;
+
+          a {
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            padding: 0.1rem 0;
+          }
+        }
+
+        .book-date {
+          grid-column: 2;
+          grid-row: 3;
+          justify-self: end;
+          align-items: flex-end;
+          text-align: right;
+          min-width: 0;
+
+          .date {
+            padding: 0;
+          }
+        }
+      }
+    }
+  }
 }

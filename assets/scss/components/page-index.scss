@@ -20,29 +20,27 @@
     margin-top: 2rem;
   }
 
-  .content-search {
-    form {
-      grid-gap: 1rem;
-      align-items: center;
-      display: grid;
-      grid-template-columns: auto 90px;
+  .content-search form {
+    grid-gap: 1rem;
+    align-items: center;
+    display: grid;
+    grid-template-columns: auto 90px;
 
-      label {
-        display: none;
-      }
+    label {
+      display: none;
+    }
 
-      input {
-        -webkit-appearance: none;
-        appearance: none;
-        background: $background;
-        border: 1px solid $border-light;
-        border-radius: 8px;
-        color: $text-bright;
-        font-size: 1.1rem;
-        padding: 0.75rem 1rem;
-      }
+    input {
+      -webkit-appearance: none;
+      appearance: none;
+      background: $background;
+      border: 1px solid $border-light;
+      border-radius: 8px;
+      color: $text-bright;
+      font-size: 1.1rem;
+      padding: 0.75rem 1rem;
 
-      input[type="submit"] {
+      &[type="submit"] {
         text-align: center;
         margin: auto;
 

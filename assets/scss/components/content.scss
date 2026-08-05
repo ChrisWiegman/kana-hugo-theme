@@ -1,7 +1,7 @@
 main {
   article {
     .content-search {
-      margin: -1.25rem 0 1rem 0;
+      margin: -1.25rem 0 1rem;
     }
 
     .content-header,
@@ -50,6 +50,7 @@ main {
 
       .highlight,
       blockquote {
+        background-color: $background-code;
         border-radius: 8px;
         border: 1px solid $border-light;
         font-size: 1.3rem;
@@ -57,7 +58,6 @@ main {
       }
 
       .highlight {
-        background-color: $background-code;
         overflow-x: auto;
 
         pre {
@@ -66,8 +66,6 @@ main {
       }
 
       blockquote {
-        background-color: $background-code;
-
         p {
           margin: 0;
           padding: 1rem;
