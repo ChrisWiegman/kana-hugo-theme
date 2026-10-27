@@ -1,0 +1,3 @@
+kind: Bug Fixes
+body: Fix deprecation warnings around Hugo's Sass module
+time: 2026-10-27T18:25:23.69715-05:00
