@@ -1,3 +1,3 @@
 module github.com/ChrisWiegman/kana-hugo-theme
 
-go 1.23.0
+go 1.27.3
