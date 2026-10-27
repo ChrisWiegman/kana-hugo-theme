@@ -17,7 +17,7 @@ clean:
 
 .PHONY: dev
 dev:
-	cd dev && hugo serve -DFO
+	cd dev && PATH="$$(pwd)/../node_modules/.bin:$$PATH" hugo serve -DFO
 
 .PHONY: changelog
 changelog: install

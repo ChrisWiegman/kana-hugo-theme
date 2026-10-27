@@ -25,14 +25,14 @@
 {{- end -}}
 {{- end -}}
 <link rel="canonical" href="{{ .Permalink }}" />
-{{ $options := (dict "targetPath" "css/main.css" "outputStyle" "compressed") }}
-{{ $style := resources.Get "scss/main.scss" | toCSS $options | minify | fingerprint }}
+{{ $options := (dict "targetPath" "css/main.css" "outputStyle" "compressed" "transpiler" "dartsass") }}
+{{ $style := resources.Get "scss/main.scss" | css.Sass $options | minify | fingerprint }}
 <link rel="stylesheet" href="{{ $style.Permalink }}" integrity="{{ $style.Data.Integrity }}" />
 {{- $codePattern := "(?m)(^|\\n)(```|~~~)|\\{\\{[%<]\\s*highlight" -}}
 {{- $needsChroma := newScratch -}}
 {{- $needsChroma.Set "value" false -}}
 {{- if not .IsHome -}}
-{{- $pageStyle := resources.Get "scss/page.scss" | toCSS $options | minify | fingerprint -}}
+{{- $pageStyle := resources.Get "scss/page.scss" | css.Sass $options | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $pageStyle.Permalink }}" integrity="{{ $pageStyle.Data.Integrity }}" />
 {{- if .IsPage -}}
 {{- $needsChroma.Set "value" (gt (len (findRE $codePattern .RawContent 1)) 0) -}}
@@ -46,12 +46,12 @@
 {{- $needsChroma.Set "value" (gt (len (findRE $codePattern .RawContent 1)) 0) -}}
 {{- end -}}
 {{- if $needsChroma.Get "value" -}}
-{{- $highlightStyle := resources.Get "scss/gruvbox.scss" | toCSS $options | minify | fingerprint -}}
+{{- $highlightStyle := resources.Get "scss/gruvbox.scss" | css.Sass $options | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $highlightStyle.Permalink }}" integrity="{{ $highlightStyle.Data.Integrity }}" />
 {{- end -}}
 {{- end -}}
 {{- if eq .Type "library" -}}
-{{- $libraryStyle := resources.Get "scss/library.scss" | toCSS $options | minify | fingerprint -}}
+{{- $libraryStyle := resources.Get "scss/library.scss" | css.Sass $options | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $libraryStyle.Permalink }}" integrity="{{ $libraryStyle.Data.Integrity }}" />
 {{- end -}}
 <link rel="icon" type="image/x-icon" href="{{ "/favicon.ico" | absURL }}" />

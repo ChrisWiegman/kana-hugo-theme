@@ -1,6 +1,6 @@
-@import "components/variables.scss";
-@import "components/content.scss";
-@import "components/page-index.scss";
+@use "components/variables" as *;
+@use "components/content";
+@use "components/page-index";
 
 // Note styles: only needed on the notes list page
 article.note {

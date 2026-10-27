@@ -1,5 +1,4 @@
-@import "components/variables.scss";
-@import "components/global.scss";
-@import "components/images.scss";
-@import "components/home.scss";
-@import "components/max-710.scss";
+@use "components/global";
+@use "components/images";
+@use "components/home";
+@use "components/max-710";

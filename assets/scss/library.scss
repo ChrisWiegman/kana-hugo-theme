@@ -1,4 +1,4 @@
-@import "components/variables.scss";
+@use "components/variables" as *;
 
 main .prevnext[hidden] { display: none; }
 
