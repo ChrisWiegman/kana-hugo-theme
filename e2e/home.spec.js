@@ -40,6 +40,16 @@ test('homepage hero image renders via asset-image shortcode', async ({
 	await expect(heroImg).toHaveAttribute('src', /\.webp/);
 	await expect(heroImg).toHaveAttribute('width', '225');
 	await expect(heroImg).toHaveAttribute('height', '225');
+	await expect(heroImg).toHaveJSProperty('naturalWidth', 450);
+});
+
+test('header icon is rendered at 2x its displayed size', async ({ page }) => {
+	await page.goto('/');
+
+	const icon = page.locator('header .site-title img');
+
+	await expect(icon).toHaveAttribute('width', '20');
+	await expect(icon).toHaveJSProperty('naturalWidth', 40);
 });
 
 test('rss feed uses author from site config', async ({ request }) => {

@@ -1,7 +1,9 @@
 {{- $src := .Get 0 -}}
-{{- $width := .Get 1 | default "225" -}}
-{{- $height := .Get 2 | default "225" -}}
+{{- $width := .Get 1 | default "225" | int -}}
+{{- $height := .Get 2 | default "225" | int -}}
 {{- $alt := .Get 3 | default "" -}}
 {{- $image := resources.Get $src -}}
-{{- $image = $image.Resize (printf "%sx%s webp" $width $height) -}}
+{{- /* Render at 2x for high-density screens, capped at the source width to avoid upscaling. */ -}}
+{{- $scale := math.Min 2 (div (float $image.Width) $width) | math.Max 1 -}}
+{{- $image = $image.Resize (printf "%dx%d webp" (int (math.Round (mul $width $scale))) (int (math.Round (mul $height $scale)))) -}}
 <img src="{{ $image.RelPermalink }}" width="{{ $width }}" height="{{ $height }}" alt="{{ $alt }}" />

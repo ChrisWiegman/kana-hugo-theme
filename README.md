@@ -215,8 +215,8 @@ Inserts a responsive image from `assets/` with automatic WebP conversion.
 | Position | Parameter | Default | Description |
 |---|---|---|---|
 | 1 | `path` | — | Path relative to `assets/` |
-| 2 | `width` | `"225"` | Width in pixels |
-| 3 | `height` | `"225"` | Height in pixels |
+| 2 | `width` | `"225"` | Displayed width in pixels (the image is generated at up to 2x for high-density screens) |
+| 3 | `height` | `"225"` | Displayed height in pixels |
 | 4 | `alt` | `""` | Alt text |
 
 ## Markdown Render Hooks
