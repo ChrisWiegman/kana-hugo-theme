@@ -12,8 +12,10 @@ sitemap:
   disable: false
 cascade:
   build:
-    render: false
+    render: always
     list: true
+  outputs:
+    - HTML
   sitemap:
     disable: true
 ---

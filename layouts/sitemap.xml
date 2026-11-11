@@ -1,4 +1,8 @@
-{{- $pages := where site.Pages "Sitemap.Disable" "ne" true -}}
+{{- /* Individual notes are never listed; they are marked noindex when rendered. */ -}}
+{{- $pages := slice -}}
+{{- range where site.Pages "Sitemap.Disable" "ne" true -}}
+    {{- if not (and .IsPage (eq .Section "notes")) }}{{ $pages = $pages | append . }}{{ end -}}
+{{- end -}}
 {{- $notesPages := where (where site.Pages "Section" "notes") "Kind" "page" -}}
 {{- $postsPages := where site.RegularPages "Section" "posts" -}}
 {{- $booksPages := slice -}}

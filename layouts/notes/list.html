@@ -14,7 +14,7 @@
                 <ul class="notes">
                     {{ range $index, $post := .Pages }}
                     <li><article class="note"{{ with $post.File }} id="{{ .ContentBaseName }}"{{ end }}>
-                        <h3 class="note-title">{{$post.Title}}</h3> <span class="note-day">{{ dateFormat "Jan 2" .Date }}</span>
+                        <h3 class="note-title">{{ with $post.RelPermalink }}<a class="u-url" href="{{ . }}">{{ $post.Title }}</a>{{ else }}{{ $post.Title }}{{ end }}</h3> <span class="note-day">{{ dateFormat "Jan 2" .Date }}</span>
                         {{ .Content }}
                     </article></li>
                     {{- end }}

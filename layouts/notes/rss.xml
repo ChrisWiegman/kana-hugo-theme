@@ -45,6 +45,8 @@
                 {{- $pageLink = printf "%spage/%d/" $pageLink $pageNum -}}
             {{- end -}}
             {{- $notesLink := printf "%s#%s" $pageLink $page.File.ContentBaseName -}}
+            {{- /* Link to the note itself when note pages are rendered (see README). */ -}}
+            {{- with $page.Permalink }}{{ $notesLink = . }}{{ end -}}
             <link>{{- $notesLink | chomp -}}</link>
             <guid isPermaLink="false">{{ $page.File.Path }}</guid>
             {{- with site.Params.author }}

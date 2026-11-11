@@ -34,6 +34,9 @@
 {{- range site.Params.identities }}
 <link rel="me" href="{{ . }}" />
 {{- end }}
+{{- if and .IsPage (eq .Section "notes") }}
+<meta name="robots" content="noindex, follow" />
+{{- end }}
 {{ $options := (dict "targetPath" "css/main.css" "outputStyle" "compressed" "transpiler" "dartsass") }}
 {{ $style := resources.Get "scss/main.scss" | css.Sass $options | minify | fingerprint }}
 <link rel="stylesheet" href="{{ $style.Permalink }}" integrity="{{ $style.Data.Integrity }}" />
