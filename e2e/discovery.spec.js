@@ -1,3 +1,4 @@
+const { createHash } = require('node:crypto');
 const { test, expect } = require('@playwright/test');
 
 function jsonLd(html) {
@@ -75,6 +76,41 @@ test('library Markdown lists every book', async ({ request }) => {
 
 	expect(count).toBeGreaterThan(0);
 	expect(body.match(/^- .+ by .+/gm)).toHaveLength(count);
+});
+
+test('agent skills index lists a skill whose digest matches the file', async ({ request }) => {
+	const response = await request.get('/.well-known/agent-skills/index.json');
+
+	expect(response.ok()).toBe(true);
+
+	const index = await response.json();
+
+	expect(index.$schema).toBe('https://schemas.agentskills.io/discovery/0.2.0/schema.json');
+	expect(index.skills).toHaveLength(1);
+
+	const [skill] = index.skills;
+
+	expect(skill.name).toBe('hugo-theme-development-site');
+	expect(skill.type).toBe('skill-md');
+	expect(skill.description).toBeTruthy();
+	expect(skill.url).toMatch(/\/\.well-known\/agent-skills\/hugo-theme-development-site\/SKILL\.md$/);
+
+	const body = await (await request.get(new URL(skill.url).pathname)).body();
+
+	expect(skill.digest).toBe(`sha256:${createHash('sha256').update(body).digest('hex')}`);
+
+	const text = body.toString();
+
+	expect(text).toMatch(/^---\nname: hugo-theme-development-site\ndescription: /);
+	expect(text).toMatch(/\/2026\/01\/[^`]+\/index\.md`/);
+	expect(text).toContain('- Training or fine-tuning AI models: not allowed.');
+	expect(text).toMatch(/\[\/llms\.txt\]\([^)]+\/llms\.txt\)/);
+});
+
+test('llms.txt links to the agent skills index', async ({ request }) => {
+	const body = await (await request.get('/llms.txt')).text();
+
+	expect(body).toMatch(/- \[Agent Skills index\]\([^)]*\/\.well-known\/agent-skills\/index\.json\)/);
 });
 
 test('robots.txt publishes content signals and blocked agents', async ({ request }) => {

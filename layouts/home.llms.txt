@@ -42,4 +42,7 @@ Written by {{ . }}{{ with site.Params.authorURL }} ({{ . | absURL }}){{ end }}. 
 {{ with site.Home.OutputFormats.Get "rss" -}}
 - [RSS feed]({{ .Permalink }}): the latest posts with full content
 {{ end -}}
+{{ with site.Home.OutputFormats.Get "agentskills" -}}
+- [Agent Skills index]({{ .Permalink }}): a skill that tells agents how to read, search, and cite this site
+{{ end -}}
 - [Sitemap]({{ "sitemap.xml" | absURL }})

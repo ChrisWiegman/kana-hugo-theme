@@ -63,11 +63,11 @@ mainSections = ["posts"]
 description  = "Your site description"
 
 [outputs]
-home = ["HTML", "RSS", "JSON", "markdown", "llms", "llmsfull"]
+home = ["HTML", "RSS", "JSON", "markdown", "llms", "llmsfull", "agentskills"]
 page = ["HTML", "markdown"]
 ```
 
-The `JSON` output on `home` is required for client-side search to work. The `llms`, `llmsfull`, and `markdown` outputs are optional; see [AI and Agent Discovery](#ai-and-agent-discovery). The theme defines these output formats, but Hugo doesn't merge `[outputs]` from themes, so a site that sets its own `[outputs]` must list them itself.
+The `JSON` output on `home` is required for client-side search to work. The `llms`, `llmsfull`, `agentskills`, and `markdown` outputs are optional; see [AI and Agent Discovery](#ai-and-agent-discovery). The theme defines these output formats, but Hugo doesn't merge `[outputs]` from themes, so a site that sets its own `[outputs]` must list them itself.
 
 ### Theme Parameters
 
@@ -266,6 +266,19 @@ fullLimit = 0    # posts included in llms-full.txt (default 0 = all)
 
 Add `"markdown"` to `outputs.page` to publish an `index.md` next to each page's `index.html`, and to `outputs.home` to publish `/index.md` for the homepage (its intro and the 10 most recent posts). Each page links to it with `<link rel="alternate" type="text/markdown">`, and llms.txt and JSON-LD point to it, so agents can read clean text instead of parsing HTML. Shortcodes are rendered and root-relative links are made absolute. The blog archive lists every post, and the library lists every book with its author, rating, finish dates, and ISBN.
 
+### Agent Skills index
+
+Add `"agentskills"` to `outputs.home` to publish an [Agent Skills discovery index](https://github.com/cloudflare/agent-skills-discovery-rfc) at `/.well-known/agent-skills/index.json`. It lists one skill, `/.well-known/agent-skills/<name>/SKILL.md`, that tells agents how to read the site: fetching pages as Markdown, starting from llms.txt, searching the JSON index, the RSS feed and sitemap, and the content signals and license that apply. Each section only appears when the matching output or parameter is enabled. The index's SHA-256 digest is computed from the published file at build time, so it always matches.
+
+```toml
+[params.agentSkills]
+name                = "my-site"   # skill name (default: the site title, lowercased with hyphens)
+description         = "..."       # one-line skill description (default: generated from the site title and URL)
+markdownNegotiation = true        # tell agents they can request Markdown with Accept: text/markdown (default false)
+```
+
+Only set `markdownNegotiation` if your host actually serves `index.md` for `Accept: text/markdown` requests (for example with a Cloudflare URL rewrite rule); the theme can't do that from static files alone.
+
 ### robots.txt AI rules
 
 `robots.txt` allows all crawlers by default. Optionally publish [content signals](https://contentsignals.org), which say how content may be used once it's accessed, and block specific crawlers entirely:
@@ -388,6 +401,8 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 
 ```
 ├── assets/
+│   ├── agent-skills/
+│   │   └── SKILL.md        # agent skill template for the Agent Skills index
 │   ├── scripts/
 │   │   ├── library.js      # book list loading, filtering, and sorting
 │   │   └── search.js       # client-side search
@@ -407,6 +422,7 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 │   ├── shortcodes/         # asset-image shortcode
 │   ├── baseof.html
 │   ├── home.html
+│   ├── home.agentskills.json # Agent Skills discovery index
 │   ├── home.llms.txt       # llms.txt
 │   ├── home.markdown.md    # Markdown version of the homepage
 │   ├── home.llmsfull.txt   # llms-full.txt

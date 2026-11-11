@@ -1,0 +1,24 @@
+{{- /*
+  Agent Skills discovery index (https://github.com/cloudflare/agent-skills-discovery-rfc)
+  at /.well-known/agent-skills/index.json. It lists one skill that tells agents
+  how to read, search, and cite this site. The skill is rendered from
+  assets/agent-skills/SKILL.md and its SHA-256 digest is computed from the
+  published bytes, so the index always matches the file.
+*/ -}}
+{{- $cfg := site.Params.agentSkills | default dict -}}
+{{- $name := $cfg.name | default (site.Title | urlize | lower) -}}
+{{- $description := $cfg.description | default (printf "Read, search, and cite content from %s (%s): find pages and posts, fetch them as Markdown, and follow the site's content-use preferences." site.Title site.BaseURL) -}}
+{{- $ctx := dict "name" $name "description" $description -}}
+{{- $target := printf ".well-known/agent-skills/%s/SKILL.md" $name -}}
+{{- $skill := resources.Get "agent-skills/SKILL.md" | resources.ExecuteAsTemplate $target $ctx -}}
+{{- $index := dict
+  "$schema" "https://schemas.agentskills.io/discovery/0.2.0/schema.json"
+  "skills" (slice (dict
+    "name" $name
+    "type" "skill-md"
+    "description" $description
+    "url" $skill.Permalink
+    "digest" (printf "sha256:%s" (crypto.SHA256 $skill.Content))
+  ))
+-}}
+{{- $index | jsonify (dict "indent" "  ") -}}

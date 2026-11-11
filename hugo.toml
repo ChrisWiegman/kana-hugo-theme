@@ -8,7 +8,8 @@
   imageSizeString = "(max-width: 882px) calc(100vw - 2rem), 850px"
 
 # Output formats used for AI and agent discovery. Sites that define their own
-# [outputs] must add "llms"/"llmsfull" to home and "markdown" to page to use them.
+# [outputs] must add "llms"/"llmsfull"/"agentskills" to home and "markdown" to
+# page to use them.
 [outputFormats.llms]
   mediaType = "text/plain"
   baseName = "llms"
@@ -23,6 +24,14 @@
   notAlternative = true
   permalinkable = true
 
+[outputFormats.agentskills]
+  mediaType = "application/json"
+  baseName = "index"
+  path = ".well-known/agent-skills"
+  isPlainText = true
+  notAlternative = true
+  permalinkable = true
+
 [outputs]
-  home = ["html", "rss", "json", "llms", "llmsfull"]
+  home = ["html", "rss", "json", "llms", "llmsfull", "agentskills"]
   page = ["html", "markdown"]
