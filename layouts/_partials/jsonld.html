@@ -1,7 +1,9 @@
 {{- /*
   Emits a single schema.org @graph describing the site, its author, and the
   current page. Nodes reference each other by @id so search engines and AI
-  crawlers can tie every page back to the same site and person.
+  crawlers can tie every page back to the same site and person. The home page
+  carries the full author and site details (profiles, description, search
+  action); other pages repeat only what's needed to identify them.
 */ -}}
 {{- $ISO8601 := "2006-01-02T15:04:05-07:00" -}}
 {{- $main := site.Params.mainSections | default (slice "posts") -}}
@@ -16,12 +18,14 @@
 {{- $person := dict -}}
 {{- with site.Params.author -}}
 {{- $person = dict "@type" "Person" "@id" $personID "name" . "url" (site.Params.authorURL | default "/" | absURL) -}}
-{{- with site.Params.identities }}{{ $person = merge $person (dict "sameAs" .) }}{{ end -}}
+{{- if $.IsHome }}{{ with site.Params.identities }}{{ $person = merge $person (dict "sameAs" .) }}{{ end }}{{ end -}}
 {{- $graph = $graph | append $person -}}
 {{- end -}}
 
 {{- /* Site */ -}}
-{{- $website := dict "@type" "WebSite" "@id" $websiteID "name" site.Title "url" $home "inLanguage" $lang -}}
+{{- $website := dict "@type" "WebSite" "@id" $websiteID "name" site.Title "url" $home -}}
+{{- if .IsHome -}}
+{{- $website = merge $website (dict "inLanguage" $lang) -}}
 {{- with site.Params.description }}{{ $website = merge $website (dict "description" .) }}{{ end -}}
 {{- with $person }}{{ $website = merge $website (dict "publisher" (dict "@id" $personID)) }}{{ end -}}
 {{- with site.GetPage "/search" -}}
@@ -30,6 +34,7 @@
   "target" (dict "@type" "EntryPoint" "urlTemplate" (printf "%s?s={search_term_string}" .Permalink))
   "query-input" "required name=search_term_string"
   )) -}}
+{{- end -}}
 {{- end -}}
 {{- $graph = $graph | append $website -}}
 
@@ -87,10 +92,12 @@
 {{- end -}}
 {{- $graph = $graph | append $page -}}
 
-{{- /* Breadcrumbs: home, then each ancestor, then this page */ -}}
+{{- /* Breadcrumbs: home, then each ancestor that has its own page, then this page */ -}}
 {{- $crumbs := slice -}}
 {{- range .Ancestors.Reverse -}}
+{{- if .Permalink -}}
 {{- $crumbs = $crumbs | append (dict "name" (cond .IsHome site.Title (.Title | plainify)) "item" .Permalink) -}}
+{{- end -}}
 {{- end -}}
 {{- $crumbs = $crumbs | append (dict "name" (.Title | plainify) "item" .Permalink) -}}
 {{- $list := slice -}}

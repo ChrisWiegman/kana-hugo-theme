@@ -121,11 +121,15 @@ test('robots.txt publishes content signals and blocked agents', async ({ request
 	expect(body).toMatch(/Sitemap: \S+\/sitemap\.xml/);
 });
 
-test('head identifies the author and their profiles', async ({ page }) => {
+test('head identifies the author, and the home page lists their profiles', async ({ page }) => {
 	await page.goto('/2026/01/hugo-development-post/');
 
 	await expect(page.locator('meta[name="author"]')).toHaveAttribute('content', 'Chris Wiegman');
-	await expect(page.locator('link[rel="me"]')).toHaveCount(2);
+	await expect(page.locator('head link[rel="me"]')).toHaveCount(0);
+
+	await page.goto('/');
+
+	await expect(page.locator('head link[rel="me"]')).toHaveCount(2);
 });
 
 test('home JSON-LD describes the site, author, and search action', async ({ request }) => {
@@ -151,6 +155,9 @@ test('post JSON-LD links the article, author, site, and breadcrumbs', async ({ r
 	expect(post.dateModified).toBeTruthy();
 	expect(post.encoding.contentUrl).toMatch(/index\.md$/);
 	expect(crumbs.itemListElement.at(-1).name).toBe('Hugo Development Post');
+	expect(crumbs.itemListElement.every((c) => c.item)).toBe(true);
+	expect(graph.find((n) => n['@type'] === 'Person').sameAs).toBeUndefined();
+	expect(graph.find((n) => n['@type'] === 'WebSite').potentialAction).toBeUndefined();
 	expect(crumbs.itemListElement[0].position).toBe(1);
 });
 

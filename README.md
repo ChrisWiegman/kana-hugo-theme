@@ -75,7 +75,7 @@ The `JSON` output on `home` is required for client-side search to work. The `llm
 |---|---|---|
 | `author` | string | Author name used as `dc:creator` in RSS feeds, the `author` meta tag, and JSON-LD (omitted when unset) |
 | `authorURL` | string | Page describing the author (e.g. `"/about/"`), used as the author's URL in JSON-LD and llms.txt. Defaults to the home page |
-| `identities` | string[] | Profile URLs for the author (Mastodon, GitHub, …). Emitted as `<link rel="me">` for profile verification and as `sameAs` in JSON-LD |
+| `identities` | string[] | Profile URLs for the author (Mastodon, GitHub, …). Emitted on the home page as `<link rel="me">` for profile verification and as `sameAs` in JSON-LD |
 | `description` | string | Site description for meta tags |
 | `subtitle` | string | Subtitle appended to the homepage title tag |
 | `mainSections` | string[] | Content sections included in the homepage post list, RSS feed, search index, and JSON-LD `BlogPosting` markup |
