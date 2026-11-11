@@ -1,8 +1,12 @@
 {{ define "main" }}
 <article class="library">
 	<div class="container">
-		{{- $booksPage := site.GetPage "books" -}}
-		{{- $books := $booksPage.Resources.ByType "page" -}}
+		{{- $books := slice -}}
+		{{- with site.GetPage "books" -}}
+			{{- $books = .Resources.ByType "page" -}}
+		{{- else -}}
+			{{- warnf "The library layout requires a content/books section; none was found." -}}
+		{{- end -}}
 
 		{{/* ---- Build normalized row model once (used by summary + list) ---- */}}
 		{{- $rows := slice -}}

@@ -1,14 +1,17 @@
 {{- $image := "" -}}
-{{- if isset .Site.Params "headericon" -}}
-{{- $image = resources.Get .Site.Params.HeaderIcon -}}
-{{- $image = $image.Resize "20x webp icon" -}}
+{{- with site.Params.headerIcon -}}
+{{- with resources.Get . -}}
+{{- $image = .Resize "20x webp icon" -}}
+{{- else -}}
+{{- warnf "headerIcon %q was not found in assets/" . -}}
 {{- end -}}
-<span class="site-title"><a href="{{ site.Home.Permalink }}">{{- if isset .Site.Params "headericon" -}}<img
-            src="{{$image.Permalink}}" alt="" />{{- end -}}
-        {{.Site.Title}}</a></span>
+{{- end -}}
+<span class="site-title"><a href="{{ site.Home.Permalink }}">{{- with $image -}}<img
+            src="{{ .Permalink }}" alt="" />{{- end -}}
+        {{ site.Title }}</a></span>
 <nav aria-label="Main navigation">
     <ul class="menu">
-        {{ range .Site.Menus.main.ByWeight }}
+        {{ range site.Menus.main.ByWeight }}
         <li><a title="{{ .Title }}" href="{{ .URL | absURL }}">{{ .Name }}</a></li>
         {{ end }}
     </ul>
