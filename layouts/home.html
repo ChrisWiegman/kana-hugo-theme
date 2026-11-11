@@ -3,7 +3,7 @@
 	{{ .Content }}
 
 	<div class="container">
-		<h2 class="main-header"><span>Recent Posts</span> <a href="/blog">View All</a></h2>
+		<h2 class="main-header"><span>Recent Posts</span> {{ with site.GetPage "/blog" }}<a href="{{ .RelPermalink }}">View All</a>{{ end }}</h2>
 		{{- $posts := where site.RegularPages "Type" "in" site.Params.mainSections }}
 		{{/* In development mode, prepend drafts to the homepage */}}
 		{{- if hugo.IsDevelopment }}

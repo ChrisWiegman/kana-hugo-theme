@@ -12,7 +12,7 @@
             {{- if .Params.tags }}
             <div class="tags">
                 {{ range .Params.tags }}
-                <a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}" title="{{ . }}">{{ . }}</a>
+                <a href="{{ printf "tags/%s/" (urlize .) | relLangURL }}" title="{{ . }}">{{ . }}</a>
                 {{ end }}
             </div>
             {{ end }}

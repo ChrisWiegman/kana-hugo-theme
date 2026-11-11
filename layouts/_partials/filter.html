@@ -1,8 +1,8 @@
 <div class="content-categories">
     <div class="categories"> Filter Posts:
-        <a href="/blog" class="category">All Posts</a>
+        {{ with site.GetPage "/blog" }}<a href="{{ .RelPermalink }}" class="category">All Posts</a>{{ end }}
         {{ range $name, $taxonomy := .Site.Taxonomies.categories }}
-        <a href="/categories/{{ $name }}/" class="category">{{ title $name }}</a>
+        <a href="{{ printf "categories/%s/" $name | relLangURL }}" class="category">{{ title $name }}</a>
         {{- end }}
     </div>
 </div>
