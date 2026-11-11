@@ -1,17 +1,31 @@
-{{- $image := resources.Get .Destination -}}
-{{- $imgSrcSet := slice -}}
-{{- with $widths := site.Params.imageSizes -}}
-{{- range $widths -}}
-{{- $srcUrl := (printf "%vx webp" . | $image.Resize).Permalink -}}
-{{- $imgSrcSet = $imgSrcSet | append (printf "%s %vw" $srcUrl .) -}}
+{{- /*
+  Resolve the image from the page bundle first, then the global assets
+  directory. Anything that can't be resolved (remote URLs, files in static/)
+  is rendered as a plain <img> so the build never fails on a missing resource.
+*/ -}}
+{{- $u := urls.Parse .Destination -}}
+{{- $image := "" -}}
+{{- if not $u.IsAbs -}}
+{{- $path := strings.TrimPrefix "./" $u.Path -}}
+{{- $image = or (.Page.Resources.Get $path) (resources.Get $path) -}}
 {{- end -}}
-{{- $imgSrcSet = (delimit $imgSrcSet ",") -}}
+{{- $src := .Destination -}}
+{{- $width := "" -}}
+{{- $height := "" -}}
+{{- $srcSet := "" -}}
+{{- with $image -}}
+{{- $src = .RelPermalink -}}
+{{- if and (eq .ResourceType "image") (ne .MediaType.SubType "svg") -}}
+{{- $width = .Width -}}
+{{- $height = .Height -}}
+{{- $srcSet = partial "image-srcset.html" . -}}
+{{- end -}}
 {{- end -}}
 {{- if .IsBlock -}}
 <figure>
-    <img{{ with .Title }} class="with-caption"{{ end }} width="{{ $image.Width }}" height="{{ $image.Height }}" src="{{ $image.RelPermalink }}" alt="{{ .Text | htmlEscape }}" decoding="async" loading="lazy"{{ if $imgSrcSet }} srcset="{{ $imgSrcSet }}" sizes="{{ site.Params.imageSizeString }}"{{ end }} />
+    <img{{ with .Title }} class="with-caption"{{ end }}{{ with $width }} width="{{ . }}"{{ end }}{{ with $height }} height="{{ . }}"{{ end }} src="{{ $src }}" alt="{{ .PlainText }}" decoding="async" loading="lazy"{{ with $srcSet }} srcset="{{ . }}" sizes="{{ site.Params.imageSizeString }}"{{ end }} />
     {{- with .Title }}<figcaption>{{ . }}</figcaption>{{- end -}}
 </figure>
 {{- else -}}
-<img width="{{ $image.Width }}" height="{{ $image.Height }}" src="{{ $image.RelPermalink }}" alt="{{ .Text | htmlEscape }}" decoding="async" loading="lazy"{{ if $imgSrcSet }} srcset="{{ $imgSrcSet }}" sizes="{{ site.Params.imageSizeString }}"{{ end }}{{ with .Title }} title="{{ . }}"{{ end }} />
+<img{{ with $width }} width="{{ . }}"{{ end }}{{ with $height }} height="{{ . }}"{{ end }} src="{{ $src }}" alt="{{ .PlainText }}" decoding="async" loading="lazy"{{ with $srcSet }} srcset="{{ . }}" sizes="{{ site.Params.imageSizeString }}"{{ end }}{{ with .Title }} title="{{ . }}"{{ end }} />
 {{- end -}}

@@ -23,14 +23,7 @@
             {{- with $featured_image := index .Params.images 0 -}}
             {{- $image := resources.Get $featured_image -}}
             {{- with $image -}}
-            {{- $webpSrcSet := slice -}}
-            {{- with $widths := site.Params.imageSizes -}}
-            {{- range $widths -}}
-            {{- $webpUrl := ($image.Resize (printf "%vx webp" .)).RelPermalink -}}
-            {{- $webpSrcSet = $webpSrcSet | append (printf "%s %vw" $webpUrl .) -}}
-            {{- end -}}
-            {{- $webpSrcSet = (delimit $webpSrcSet ",") -}}
-            {{- end -}}
+            {{- $webpSrcSet := partial "image-srcset.html" $image -}}
             <figure>
                 <img width="{{ $image.Width }}" height="{{ $image.Height }}" src="{{ $image.RelPermalink }}" alt="{{ $.Title }}" decoding="async" fetchpriority="high"{{ if $webpSrcSet }} srcset="{{ $webpSrcSet }}" sizes="{{ site.Params.imageSizeString }}"{{ end }} />
             </figure>

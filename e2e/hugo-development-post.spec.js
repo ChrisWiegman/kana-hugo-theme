@@ -42,3 +42,32 @@ test('hugo development post renders key content types', async ({ page }) => {
 		'This is an image with alt text and a caption',
 	);
 });
+
+test('image render hook falls back for images it cannot process', async ({ page }) => {
+	await page.goto('/2026/01/hugo-development-post/');
+
+	const staticImage = page.locator('.content img[alt=\'A static icon\']');
+
+	await expect(staticImage).toHaveAttribute('src', /android-chrome-192x192\.png$/);
+	await expect(staticImage).not.toHaveAttribute('srcset');
+});
+
+test('image render hook never upscales small images', async ({ page }) => {
+	await page.goto('/2026/01/hugo-development-post/');
+
+	const smallImage = page.locator('.content img[alt=\'The theme icon\']');
+
+	await expect(smallImage).toHaveAttribute('width', '200');
+	const srcset = await smallImage.getAttribute('srcset');
+	const widths = srcset.split(',').map((entry) => parseInt(entry.trim().split(' ')[1], 10));
+
+	expect(widths).toEqual([200]);
+});
+
+test('image sizes attribute uses valid lengths', async ({ page }) => {
+	await page.goto('/2026/01/hugo-development-post/');
+
+	const sizes = await page.locator('figure img').first().getAttribute('sizes');
+
+	expect(sizes).not.toMatch(/\d+w\b/);
+});

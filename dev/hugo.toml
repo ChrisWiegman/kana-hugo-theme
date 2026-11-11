@@ -25,7 +25,7 @@ author = "Chris Wiegman"
 description = "A development site for the Hugo theme I use on my own site."
 subtitle = "A minimalistic Hugo theme"
 imageSizes = [850, 710, 300]
-imageSizeString = "(max-width: 300px) 300w, (max-width: 710px) 710w, 850w"
+imageSizeString = "(max-width: 300px) 300px, (max-width: 710px) 710px, 850px"
 policies = "/policies"
 headerIcon = "images/2025/12/hugo-theme.png"
 
