@@ -15,7 +15,8 @@ clean:
 		dev/public \
 		dev/resources \
 		dev/.hugo_build.lock \
-		test-results
+		test-results \
+		.claude
 
 .PHONY: dev
 dev:
