@@ -1,3 +1,0 @@
-kind: Features
-body: Publish an Agent Skills discovery index (add "agentskills" to outputs.home) at /.well-known/agent-skills/index.json with one skill that tells agents how to read, search, and cite the site, including its content signals and license. The skill's SHA-256 digest is computed from the published file at build time, and llms.txt links to the index. Configure it with params.agentSkills.
-time: 2026-11-11T18:00:00.000000-06:00
