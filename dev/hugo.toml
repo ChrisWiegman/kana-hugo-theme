@@ -18,6 +18,13 @@ enable = true
 pagerSize = 25
 mainSections = ["posts"]
 OpenGraph = true
+jsonld = true
+jsonldBooks = true
+authorURL = "/about/"
+identities = [
+  "https://mastodon.chriswiegman.com/@chris",
+  "https://github.com/ChrisWiegman",
+]
 TwitterCards = true
 MobileWebAppTitle = "Hugo"
 FediverseCreator = "@chris@mastodon.chriswiegman.com"

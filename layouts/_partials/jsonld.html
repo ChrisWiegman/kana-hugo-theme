@@ -1,23 +1,103 @@
+{{- /*
+  Emits a single schema.org @graph describing the site, its author, and the
+  current page. Nodes reference each other by @id so search engines and AI
+  crawlers can tie every page back to the same site and person.
+*/ -}}
 {{- $ISO8601 := "2006-01-02T15:04:05-07:00" -}}
-{{- $data := dict -}}
 {{- $main := site.Params.mainSections | default (slice "posts") -}}
 {{- $sections := cond (reflect.IsSlice $main) $main (slice $main) -}}
-{{- if .IsHome -}}
-{{- $data = dict "@context" "https://schema.org" "@type" "WebSite" "name" .Site.Title "url" .Site.BaseURL -}}
-{{- with .Site.Params.description -}}{{- $data = merge $data (dict "description" .) -}}{{- end -}}
-{{- else if and .IsPage (in $sections .Section) -}}
-{{- $description := cond (ne (trim .Description " ") "") .Description (.Summary | plainify | truncate 160) -}}
-{{- $data = dict "@context" "https://schema.org" "@type" "BlogPosting" "headline" (.Title | plainify) "url" .Permalink "description" $description -}}
-{{- with .Date -}}{{- $data = merge $data (dict "datePublished" (.Format $ISO8601)) -}}{{- end -}}
-{{- with .Lastmod -}}{{- $data = merge $data (dict "dateModified" (.Format $ISO8601)) -}}{{- end -}}
-{{- with .Site.Params.author -}}{{- $data = merge $data (dict "author" (dict "@type" "Person" "name" .)) -}}{{- end -}}
-{{- with index .Params.images 0 -}}{{- $data = merge $data (dict "image" (. | absURL)) -}}{{- end -}}
-{{- with .Params.tags -}}{{- $data = merge $data (dict "keywords" (delimit . ", ")) -}}{{- end -}}
-{{- else if .IsPage -}}
-{{- $description := cond (ne (trim .Description " ") "") .Description (.Summary | plainify | truncate 160) -}}
-{{- $data = dict "@context" "https://schema.org" "@type" "WebPage" "name" (.Title | plainify) "url" .Permalink "description" $description -}}
-{{- with .Site.Params.author -}}{{- $data = merge $data (dict "author" (dict "@type" "Person" "name" .)) -}}{{- end -}}
+{{- $home := site.Home.Permalink -}}
+{{- $lang := site.Language.Locale | default "en" -}}
+{{- $websiteID := printf "%s#website" $home -}}
+{{- $personID := printf "%s#author" $home -}}
+{{- $graph := slice -}}
+
+{{- /* Author */ -}}
+{{- $person := dict -}}
+{{- with site.Params.author -}}
+{{- $person = dict "@type" "Person" "@id" $personID "name" . "url" (site.Params.authorURL | default "/" | absURL) -}}
+{{- with site.Params.identities }}{{ $person = merge $person (dict "sameAs" .) }}{{ end -}}
+{{- $graph = $graph | append $person -}}
 {{- end -}}
-{{- with $data -}}
-{{- printf "<script type=\"application/ld+json\">%s</script>" (. | jsonify) | safeHTML }}
+
+{{- /* Site */ -}}
+{{- $website := dict "@type" "WebSite" "@id" $websiteID "name" site.Title "url" $home "inLanguage" $lang -}}
+{{- with site.Params.description }}{{ $website = merge $website (dict "description" .) }}{{ end -}}
+{{- with $person }}{{ $website = merge $website (dict "publisher" (dict "@id" $personID)) }}{{ end -}}
+{{- with site.GetPage "/search" -}}
+{{- $website = merge $website (dict "potentialAction" (dict
+  "@type" "SearchAction"
+  "target" (dict "@type" "EntryPoint" "urlTemplate" (printf "%s?s={search_term_string}" .Permalink))
+  "query-input" "required name=search_term_string"
+  )) -}}
 {{- end -}}
+{{- $graph = $graph | append $website -}}
+
+{{- if not .IsHome -}}
+{{- $description := cond (ne (trim .Description " ") "") .Description (.Summary | plainify | htmlUnescape | truncate 160) -}}
+
+{{- /* Current page */ -}}
+{{- $type := "WebPage" -}}
+{{- if and .IsPage (in $sections .Section) }}{{ $type = "BlogPosting" }}{{ end -}}
+{{- if or .IsSection (eq .Kind "term") (eq .Layout "blog") }}{{ $type = "CollectionPage" }}{{ end -}}
+{{- if eq .Layout "search" }}{{ $type = "SearchResultsPage" }}{{ end -}}
+{{- $page := dict
+  "@type" $type
+  "@id" (printf "%s#webpage" .Permalink)
+  "url" .Permalink
+  "name" (.Title | plainify)
+  "inLanguage" $lang
+  "isPartOf" (dict "@id" $websiteID)
+  "breadcrumb" (dict "@id" (printf "%s#breadcrumb" .Permalink))
+-}}
+{{- with $description }}{{ $page = merge $page (dict "description" .) }}{{ end -}}
+{{- if not .Date.IsZero }}{{ $page = merge $page (dict "datePublished" (.Date.Format $ISO8601)) }}{{ end -}}
+{{- if not .Lastmod.IsZero }}{{ $page = merge $page (dict "dateModified" (.Lastmod.Format $ISO8601)) }}{{ end -}}
+{{- with $person }}{{ $page = merge $page (dict "author" (dict "@id" $personID)) }}{{ end -}}
+{{- with .OutputFormats.Get "markdown" }}{{ $page = merge $page (dict "encoding" (dict "@type" "MediaObject" "encodingFormat" "text/markdown" "contentUrl" .Permalink)) }}{{ end -}}
+{{- if eq $type "BlogPosting" -}}
+{{- $page = merge $page (dict "headline" (.Title | plainify) "mainEntityOfPage" .Permalink "wordCount" .WordCount) -}}
+{{- with $person }}{{ $page = merge $page (dict "publisher" (dict "@id" $personID)) }}{{ end -}}
+{{- with .Params.categories }}{{ $page = merge $page (dict "articleSection" (index . 0)) }}{{ end -}}
+{{- with .Params.tags }}{{ $page = merge $page (dict "keywords" (delimit . ", ")) }}{{ end -}}
+{{- with index .Params.images 0 -}}
+{{- $url := . | absURL -}}
+{{- with resources.Get . }}{{ $url = .Permalink }}{{ end -}}
+{{- $page = merge $page (dict "image" $url) -}}
+{{- end -}}
+{{- end -}}
+
+{{- /* Library: optionally describe every book (can be large on big libraries) */ -}}
+{{- if and (eq .Layout "library") site.Params.jsonldBooks -}}
+{{- with site.GetPage "books" -}}
+{{- $items := slice -}}
+{{- range $i, $book := sort (.Resources.ByType "page") "Title" -}}
+{{- $node := dict "@type" "Book" "name" $book.Title -}}
+{{- with $book.Params.author }}{{ $node = merge $node (dict "author" (dict "@type" "Person" "name" .)) }}{{ end -}}
+{{- with $book.Params.reference.isbn }}{{ $node = merge $node (dict "isbn" .) }}{{ end -}}
+{{- with $book.Params.rating -}}
+{{- $review := dict "@type" "Review" "reviewRating" (dict "@type" "Rating" "ratingValue" . "bestRating" 5 "worstRating" 1) -}}
+{{- with $person }}{{ $review = merge $review (dict "author" (dict "@id" $personID)) }}{{ end -}}
+{{- $node = merge $node (dict "review" $review) -}}
+{{- end -}}
+{{- $items = $items | append (dict "@type" "ListItem" "position" (add $i 1) "item" $node) -}}
+{{- end -}}
+{{- $page = merge $page (dict "@type" "CollectionPage" "mainEntity" (dict "@type" "ItemList" "numberOfItems" (len $items) "itemListElement" $items)) -}}
+{{- end -}}
+{{- end -}}
+{{- $graph = $graph | append $page -}}
+
+{{- /* Breadcrumbs: home, then each ancestor, then this page */ -}}
+{{- $crumbs := slice -}}
+{{- range .Ancestors.Reverse -}}
+{{- $crumbs = $crumbs | append (dict "name" (cond .IsHome site.Title (.Title | plainify)) "item" .Permalink) -}}
+{{- end -}}
+{{- $crumbs = $crumbs | append (dict "name" (.Title | plainify) "item" .Permalink) -}}
+{{- $list := slice -}}
+{{- range $i, $c := $crumbs -}}
+{{- $list = $list | append (dict "@type" "ListItem" "position" (add $i 1) "name" $c.name "item" $c.item) -}}
+{{- end -}}
+{{- $graph = $graph | append (dict "@type" "BreadcrumbList" "@id" (printf "%s#breadcrumb" .Permalink) "itemListElement" $list) -}}
+{{- end -}}
+
+{{- printf "<script type=\"application/ld+json\">%s</script>" (dict "@context" "https://schema.org" "@graph" $graph | jsonify) | safeHTML -}}
