@@ -10,7 +10,7 @@
         {{ partial "form.html" . }}
 
         {{ partial "results.html" . }}
-        <noscript><p>Search requires JavaScript. Please enable JavaScript or <a href="/blog">browse all posts</a>.</p></noscript>
+        <noscript><p>Search requires JavaScript. Please enable JavaScript or <a href="{{ with site.GetPage "/blog" }}{{ .RelPermalink }}{{ else }}{{ site.Home.RelPermalink }}{{ end }}">browse all posts</a>.</p></noscript>
     </div>
 </article>
 

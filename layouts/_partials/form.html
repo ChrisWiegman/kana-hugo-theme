@@ -1,6 +1,8 @@
+{{- $action := "search/" | relLangURL -}}
+{{- with site.GetPage "/search" }}{{ $action = .RelPermalink }}{{ end -}}
 <div class="content-search">
-    <form action="/search" method="get"> <label for="search">Search all content</label> <input type="text"
-            name="s" id="search" placeholder="Search all content" value="" autocomplete="search"> <input type="submit" alt="Search"
+    <form action="{{ $action }}" method="get" role="search"> <label for="search">Search all content</label> <input type="search"
+            name="s" id="search" placeholder="Search all content" value="" autocomplete="off" required> <input type="submit"
             value="Search">
     </form>
 </div>

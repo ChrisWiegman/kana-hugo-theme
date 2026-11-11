@@ -1,4 +1,8 @@
 <div class="content e-content" itemprop="articleBody">
-    <h2 class="main-header"><span>Search Results</span> <a href="/blog">View All</a></h2>
-    <div id="search-results"></div>
+    <h2 class="main-header"><span>Search Results</span> {{ with site.GetPage "/blog" }}<a href="{{ .RelPermalink }}">View All</a>{{ end }}</h2>
+    {{- $fallback := site.Home.RelPermalink -}}
+    {{- with site.GetPage "/blog" }}{{ $fallback = .RelPermalink }}{{ end -}}
+    {{- $index := site.Home.RelPermalink -}}
+    {{- with site.Home.OutputFormats.Get "json" }}{{ $index = .RelPermalink }}{{ end }}
+    <div id="search-results" data-index="{{ $index }}" data-fallback="{{ $fallback }}"></div>
 </div>

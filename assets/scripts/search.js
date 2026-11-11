@@ -8,8 +8,14 @@
 	const searchCount = document.getElementById('search-count');
 	const searchResults = document.getElementById('search-results');
 
+	const indexUrl = (searchResults && searchResults.dataset.index) || '/index.json';
+	const fallbackUrl = (searchResults && searchResults.dataset.fallback) || '/';
+	const locale = document.documentElement.lang || undefined;
+
+	if (!searchResults) return;
+
 	if (!searchQuery) {
-		window.location.assign('/blog');
+		window.location.assign(fallbackUrl);
 		return;
 	}
 
@@ -22,8 +28,12 @@
 	executeSearch(searchQuery);
 
 	function executeSearch(query) {
-		fetch('/index.json')
-			.then((response) => response.json())
+		fetch(indexUrl)
+			.then((response) => {
+				if (!response.ok) throw new Error('HTTP ' + response.status);
+
+				return response.json();
+			})
 			.then((data) => {
 				const results = search(data, query);
 
@@ -93,20 +103,20 @@
 	function populateResults(results) {
 		const template = document.getElementById('search-result-template').innerHTML;
 		const fragment = document.createDocumentFragment();
+		const dateFormat = new Intl.DateTimeFormat(locale, {
+			day: 'numeric',
+			month: 'short',
+			year: 'numeric',
+		});
 
 		results.forEach((result, index) => {
 			const date = new Date(result.item.date);
-			const displayDate = new Intl.DateTimeFormat('en', {
-				day: 'numeric',
-				month: 'short',
-				year: 'numeric',
-			}).format(date);
-
+			const displayDate = isNaN(date) ? '' : dateFormat.format(date);
 			const html = render(template, {
 				key: index,
-				title: result.item.title,
-				link: result.item.permalink,
-				date: displayDate,
+				title: escapeHtml(result.item.title || ''),
+				link: escapeHtml(result.item.permalink || ''),
+				date: escapeHtml(displayDate),
 			});
 
 			const wrapper = document.createElement('div');
@@ -116,6 +126,15 @@
 		});
 
 		searchResults.appendChild(fragment);
+	}
+
+	function escapeHtml(value) {
+		return String(value)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
 	}
 
 	function getUrlParam(name) {
@@ -138,7 +157,7 @@
 		Object.keys(data).forEach((key) => {
 			const pattern = new RegExp('\\$\\{\\s*' + key + '\\s*\\}', 'g');
 
-			result = result.replace(pattern, data[key]);
+			result = result.replace(pattern, () => data[key]);
 		});
 
 		return result;
