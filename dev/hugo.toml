@@ -32,6 +32,15 @@ name = "MIT Licensed"
 title = "The theme code is licensed under the MIT license."
 link = "https://github.com/ChrisWiegman/kana-hugo-theme/blob/main/LICENSE.txt"
 
+[imaging]
+resampleFilter = "lanczos"
+
+[imaging.jpeg]
+quality = 85
+
+[imaging.webp]
+quality = 85
+
 [minify]
 minifyOutput = false
 

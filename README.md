@@ -89,6 +89,25 @@ The `JSON` output on `home` is required for client-side search to work.
 | `websubHub` | string | WebSub hub advertised in RSS feeds (default `"https://pubsubhubbub.appspot.com/"`; set to `""` to omit it) |
 | `license` | object | `name`, `title`, and `link` shown in the footer (see below) |
 
+### Image Quality
+
+Hugo doesn't read `[imaging]` settings from a theme, so set them in your site's config. Hugo's defaults (quality 75, `box` resampling) visibly soften images. Recommended:
+
+```toml
+[imaging]
+resampleFilter = "lanczos"
+
+[imaging.jpeg]
+quality = 85
+
+[imaging.webp]
+quality = 85
+# For sites that are mostly screenshots or text, also add:
+# hint = "drawing"
+```
+
+After changing these, delete `resources/_gen/images` so Hugo regenerates its cached images.
+
 ### License Footer
 
 ```toml
