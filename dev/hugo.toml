@@ -3,7 +3,6 @@ baseURL = "https://hugo.chriswiegman.com"
 relativeURLs = true
 locale = "en-us"
 disableHugoGeneratorInject = true
-cleanDestinationDir = true
 enableRobotsTXT = true
 enableGitInfo = true
 canonifyURLs = true
@@ -11,6 +10,9 @@ disableKinds = ["taxonomy"]
 timeout = "90s"
 theme = "kana-hugo-theme"
 themesDir = "../.."
+
+[build.cleanDestinationDir]
+enable = true
 
 [params]
 pagerSize = 25

@@ -6,7 +6,7 @@ homepage = "https://kana.sh"
 demosite = "https://chriswiegman.com"
 tags = ["blog", "minimal", "dark"]
 features = ["search"]
-min_version = "0.152.0"
+min_version = "0.169.0"
 
 # If the theme has a single author
 [author]
