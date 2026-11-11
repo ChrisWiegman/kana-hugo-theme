@@ -25,3 +25,18 @@ test('sitemap uses latest note date for notes', async ({ request }) => {
 	expect(notesMatch).not.toBeNull();
 	expect(notesMatch[1]).toMatch(/^2025-07-23T/);
 });
+
+test('notes rss feed uses author from site config and links to notes', async ({ request }) => {
+	const response = await request.get('/notes/index.xml');
+
+	expect(response.ok()).toBe(true);
+	const body = await response.text();
+
+	expect(body).toContain('<dc:creator>Chris Wiegman</dc:creator>');
+	const links = [...body.matchAll(/<item>[\s\S]*?<link>([^<]+)<\/link>/g)].map((m) => m[1]);
+
+	expect(links.length).toBeGreaterThan(0);
+	for (const link of links) {
+		expect(link).toMatch(/\/notes\/(page\/\d+\/)?#[\w-]+$/);
+	}
+});

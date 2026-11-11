@@ -30,7 +30,7 @@
         <sy:updatePeriod>hourly</sy:updatePeriod>
         <sy:updateFrequency>1</sy:updateFrequency>
 
-        {{- $pagerSize := 25 -}}
+        {{- $pagerSize := $.Paginator.PagerSize -}}
         {{- $base := strings.TrimSuffix "/" site.BaseURL -}}
         {{ range $index, $page := $pages }}
         <item>
@@ -43,7 +43,9 @@
             {{- $notesLink := printf "%s#%s" $pageLink $page.File.ContentBaseName -}}
             <link>{{- $notesLink | chomp -}}</link>
             <guid isPermaLink="false">{{ $page.File.Path }}</guid>
-            <dc:creator>{{ "Chris Wiegman" | htmlEscape }}</dc:creator>
+            {{- with site.Params.author }}
+            <dc:creator>{{ . | htmlEscape }}</dc:creator>
+            {{- end }}
             <pubDate>{{ $page.Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
             {{- with $page.Summary -}}
                 <description>{{ . | plainify | htmlEscape }}</description>
