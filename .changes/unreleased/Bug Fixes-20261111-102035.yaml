@@ -1,0 +1,3 @@
+kind: Bug Fixes
+body: Search index and JSON-LD BlogPosting markup now respect mainSections instead of assuming a posts section.
+time: 2026-11-11T10:20:35.655935-06:00

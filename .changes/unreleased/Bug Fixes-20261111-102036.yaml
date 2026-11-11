@@ -1,0 +1,3 @@
+kind: Bug Fixes
+body: Links to the blog, search, tags, and categories no longer assume the site lives at the domain root.
+time: 2026-11-11T10:20:36.734103-06:00

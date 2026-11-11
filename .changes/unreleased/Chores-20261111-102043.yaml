@@ -1,0 +1,3 @@
+kind: Chores
+body: Pin the Hugo version used in CI instead of fetching the latest release, and stop concurrent CI runs on different branches from cancelling each other.
+time: 2026-11-11T10:20:43.169069-06:00

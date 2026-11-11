@@ -1,0 +1,3 @@
+kind: Bug Fixes
+body: Fix invalid search form attributes, the html lang attribute, and the schema.org URL; the library heading now uses the page title.
+time: 2026-11-11T10:20:39.956763-06:00

@@ -1,0 +1,3 @@
+kind: Bug Fixes
+body: Replace deprecated .Params.description with .Description and remove deprecated .Scratch usage in JSON outputs.
+time: 2026-11-11T10:20:34.583591-06:00

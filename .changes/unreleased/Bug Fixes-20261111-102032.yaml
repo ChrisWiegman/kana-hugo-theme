@@ -1,0 +1,3 @@
+kind: Bug Fixes
+body: Responsive images are no longer upscaled past their original width, and srcset URLs are now absolute so every entry resolves correctly with relativeURLs and in RSS feeds.
+time: 2026-11-11T10:20:32.428653-06:00
