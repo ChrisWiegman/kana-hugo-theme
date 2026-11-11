@@ -1,5 +1,29 @@
 const { test, expect } = require('@playwright/test');
 
+test('llms.txt lists the site, its pages, and recent posts', async ({ request }) => {
+	const response = await request.get('/llms.txt');
+
+	expect(response.ok()).toBe(true);
+
+	const body = await response.text();
+
+	expect(body).toMatch(/^# Hugo Theme Development Site\n\n> A development site/);
+	expect(body).toContain('## Pages');
+	expect(body).toMatch(/- \[About Me\]\([^)]*\/about\/index\.md\): /);
+	expect(body).not.toContain('Search Results');
+	expect(body).toContain('## Recent posts');
+	expect(body).toMatch(/- \[Hugo Development Post 2\]\([^)]*\/2026\/01\/hugo-development-post-2\/index\.md\) \(2026-01-14\)/);
+	expect(body).toMatch(/- \[Full text of all posts\]\([^)]*\/llms-full\.txt\)/);
+});
+
+test('llms-full.txt contains the full Markdown of every post', async ({ request }) => {
+	const body = await (await request.get('/llms-full.txt')).text();
+
+	expect(body).toMatch(/This file contains the full text of \d+ posts/);
+	expect(body).toContain('# Hugo Development Post\n');
+	expect(body).toContain('add_action( \'some_wp_action\', __return_false );');
+});
+
 test('posts publish a Markdown version and link to it', async ({ page, request }) => {
 	await page.goto('/2026/01/hugo-development-post/');
 

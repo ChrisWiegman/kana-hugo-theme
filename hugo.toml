@@ -7,8 +7,22 @@
   imageSizes = [1700, 1420, 850, 710, 600, 300]
   imageSizeString = "(max-width: 882px) calc(100vw - 2rem), 850px"
 
-# Sites that define their own [outputs] must add "markdown" to page to publish
-# Markdown versions of pages; Hugo doesn't merge [outputs] from themes.
+# Output formats used for AI and agent discovery. Sites that define their own
+# [outputs] must add "llms"/"llmsfull" to home and "markdown" to page to use them.
+[outputFormats.llms]
+  mediaType = "text/plain"
+  baseName = "llms"
+  isPlainText = true
+  notAlternative = true
+  permalinkable = true
+
+[outputFormats.llmsfull]
+  mediaType = "text/plain"
+  baseName = "llms-full"
+  isPlainText = true
+  notAlternative = true
+  permalinkable = true
+
 [outputs]
-  home = ["html", "rss", "json"]
+  home = ["html", "rss", "json", "llms", "llmsfull"]
   page = ["html", "markdown"]

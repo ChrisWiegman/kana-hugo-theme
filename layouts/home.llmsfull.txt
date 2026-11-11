@@ -1,0 +1,14 @@
+{{- $posts := partial "llms/posts.html" . -}}
+{{- with site.Params.llms.fullLimit }}{{ $posts = first . $posts }}{{ end -}}
+# {{ site.Title }}
+{{ with site.Params.description }}
+> {{ . }}
+{{ end }}
+This file contains the full text of {{ len $posts }} posts, newest first, in Markdown.
+{{ range $posts }}
+{{ partial "llms/frontmatter.html" . }}
+
+# {{ .Title }}
+
+{{ partial "llms/content.html" . }}
+{{ end -}}

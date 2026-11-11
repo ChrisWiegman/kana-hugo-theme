@@ -1,0 +1,4 @@
+{{- /* Returns a one-line description for a page: its description, or a plain-text summary. */ -}}
+{{- $desc := trim .Description " \n" -}}
+{{- if not $desc }}{{ $desc = .Summary | plainify | htmlUnescape | truncate 160 }}{{ end -}}
+{{- return (replaceRE `\s+` " " $desc) -}}

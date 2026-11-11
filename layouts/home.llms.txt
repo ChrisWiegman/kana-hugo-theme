@@ -1,0 +1,45 @@
+{{- $posts := partial "llms/posts.html" . -}}
+{{- $limit := site.Params.llms.limit | default 50 -}}
+# {{ site.Title }}
+{{ with site.Params.description }}
+> {{ . }}
+{{ end }}
+{{- with site.Params.llms.summary }}
+{{ . }}
+{{ end }}
+{{- with site.Params.author }}
+Written by {{ . }}{{ with site.Params.authorURL }} ({{ . | absURL }}){{ end }}. Links point to a Markdown version of each page where one is available.
+{{ end }}
+{{- $pages := slice -}}
+{{- range (where site.RegularPages "Section" "").ByTitle -}}
+{{- if and (ne .Layout "search") (not .Sitemap.Disable) }}{{ $pages = $pages | append . }}{{ end -}}
+{{- end -}}
+{{- with $pages }}
+## Pages
+
+{{ range . -}}
+- [{{ .Title }}]({{ partial "llms/url.html" . }}){{ with partial "llms/description.html" . }}: {{ . }}{{ end }}
+{{ end -}}
+{{- end }}
+{{- with $posts }}
+## Recent posts
+
+{{ range first $limit . -}}
+- [{{ .Title }}]({{ partial "llms/url.html" . }}) ({{ .Date.Format "2006-01-02" }}){{ with partial "llms/description.html" . }}: {{ . }}{{ end }}
+{{ end -}}
+{{- end }}
+## Optional
+
+{{ with site.GetPage "/blog" -}}
+- [All posts]({{ partial "llms/url.html" . }}): every post on the site, newest first
+{{ end -}}
+{{ with site.Home.OutputFormats.Get "llmsfull" -}}
+- [Full text of all posts]({{ .Permalink }}): the complete Markdown of every post in one file
+{{ end -}}
+{{ with site.GetPage "/notes" -}}
+- [Notes]({{ .Permalink }}): {{ with .Description }}{{ . }}{{ else }}short-form notes{{ end }}
+{{ end -}}
+{{ with site.Home.OutputFormats.Get "rss" -}}
+- [RSS feed]({{ .Permalink }}): the latest posts with full content
+{{ end -}}
+- [Sitemap]({{ "sitemap.xml" | absURL }})
