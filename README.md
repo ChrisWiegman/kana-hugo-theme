@@ -63,16 +63,19 @@ mainSections = ["posts"]
 description  = "Your site description"
 
 [outputs]
-home = ["HTML", "RSS", "JSON"]
+home = ["HTML", "RSS", "JSON", "llms", "llmsfull"]
+page = ["HTML", "markdown"]
 ```
 
-The `JSON` output on `home` is required for client-side search to work.
+The `JSON` output on `home` is required for client-side search to work. The `llms`, `llmsfull`, and `markdown` outputs are optional; see [AI and Agent Discovery](#ai-and-agent-discovery). The theme defines these output formats, but Hugo doesn't merge `[outputs]` from themes, so a site that sets its own `[outputs]` must list them itself.
 
 ### Theme Parameters
 
 | Parameter | Type | Description |
 |---|---|---|
-| `author` | string | Author name used as `dc:creator` in RSS feeds and in JSON-LD (omitted when unset) |
+| `author` | string | Author name used as `dc:creator` in RSS feeds, the `author` meta tag, and JSON-LD (omitted when unset) |
+| `authorURL` | string | Page describing the author (e.g. `"/about/"`), used as the author's URL in JSON-LD and llms.txt. Defaults to the home page |
+| `identities` | string[] | Profile URLs for the author (Mastodon, GitHub, …). Emitted as `<link rel="me">` for profile verification and as `sameAs` in JSON-LD |
 | `description` | string | Site description for meta tags |
 | `subtitle` | string | Subtitle appended to the homepage title tag |
 | `mainSections` | string[] | Content sections included in the homepage post list, RSS feed, search index, and JSON-LD `BlogPosting` markup |
@@ -81,11 +84,14 @@ The `JSON` output on `home` is required for client-side search to work.
 | `imageSizeString` | string | The HTML `sizes` attribute for responsive images: the image's displayed width as a CSS length (`px`, `vw`, or `calc()`, never `w`). Defaults to `"(max-width: 882px) calc(100vw - 2rem), 850px"`, which matches the theme's content column |
 | `OpenGraph` | bool | Emit Open Graph meta tags |
 | `TwitterCards` | bool | Emit Twitter Card meta tags |
-| `jsonld` | bool | Emit JSON-LD meta tags (off by default) |
+| `jsonld` | bool | Emit JSON-LD structured data (off by default) |
+| `jsonldBooks` | bool | Also describe every book on the library page in JSON-LD. Off by default, since it adds roughly 300 bytes per book to the page |
 | `FediverseCreator` | string | Fediverse handle for `fediverse:creator` meta tag (e.g. `"@user@instance.social"`) |
 | `MobileWebAppTitle` | string | `apple-mobile-web-app-title` meta value |
 | `policies` | string | Path to a policies page linked in the footer |
 | `pagerSize` | int | Number of books shown per batch in the library (default `25`) |
+| `llms` | object | Options for `llms.txt`; see [AI and Agent Discovery](#ai-and-agent-discovery) |
+| `robots` | object | AI crawler rules for `robots.txt`; see [AI and Agent Discovery](#ai-and-agent-discovery) |
 | `websubHub` | string | WebSub hub advertised in RSS feeds (default `"https://pubsubhubbub.appspot.com/"`; set to `""` to omit it) |
 | `license` | object | `name`, `title`, and `link` shown in the footer (see below) |
 
@@ -159,6 +165,23 @@ tags       = ["tag-one", "tag-two"]
 
 Short-form content with its own paginated archive and RSS feed at `/notes/index.xml`. Notes are grouped by year.
 
+#### Note permalinks (optional)
+
+By default notes only exist on the archive pages, and the feed links to each note's anchor there. To give each note a stable URL of its own, let Hugo render note pages from your `content/notes/_index.md` cascade:
+
+```yaml
+cascade:
+  build:
+    render: always   # was: false
+    list: true
+  outputs:
+    - HTML           # skip the Markdown output for individual notes
+  sitemap:
+    disable: true
+```
+
+When note pages exist, the theme links each note's title in the archive to its page and points the feed's `<link>` at it. Feed GUIDs don't change, so readers won't see notes again as new items. Individual note pages are marked `noindex, follow` and are never listed in the sitemap or the search index, so notes stay out of search results as individual pages while gaining permanent, citable URLs.
+
 Front matter:
 
 ```toml
@@ -200,7 +223,7 @@ isbn = "9780000000000"
 asin = "B000000000"
 ```
 
-`cover` and `reference` are stored for use by your own templates; the library page does not display them yet. New books can be scaffolded with `hugo new books/author-name/book-title.md`, which uses the `books` archetype.
+`cover` is stored for use by your own templates; the library page does not display it yet. `reference.isbn` is included in the library's Markdown output and, with `jsonldBooks`, its JSON-LD. New books can be scaffolded with `hugo new books/author-name/book-title.md`, which uses the `books` archetype.
 
 The library page supports filtering by year finished, author, and star rating, plus sorting by title, author, rating, or date. A statistics panel shows books read per year, top authors, and rating distribution.
 
@@ -220,6 +243,54 @@ layout = "search"
 ```
 
 The search index is built from the JSON output on the homepage and runs entirely client-side — no server required. It searches post titles, categories, tags, and body content.
+
+## AI and Agent Discovery
+
+All of these are off unless enabled, so existing sites don't change until you opt in.
+
+### llms.txt and llms-full.txt
+
+Add `"llms"` and `"llmsfull"` to `outputs.home` to publish:
+
+- **`/llms.txt`**: a Markdown index of the site following the [llms.txt proposal](https://llmstxt.org): the site description, top-level pages, recent posts, and links to the archive, notes, feeds, and sitemap.
+- **`/llms-full.txt`**: the full Markdown of every post in `mainSections`, newest first, each with a small front matter block (title, URL, dates, tags).
+
+```toml
+[params.llms]
+summary   = "A paragraph of extra context shown under the description."
+limit     = 50   # recent posts listed in llms.txt (default 50)
+fullLimit = 0    # posts included in llms-full.txt (default 0 = all)
+```
+
+### Markdown versions of pages
+
+Add `"markdown"` to `outputs.page` to publish an `index.md` next to each page's `index.html`. Each page links to it with `<link rel="alternate" type="text/markdown">`, and llms.txt and JSON-LD point to it, so agents can read clean text instead of parsing HTML. Shortcodes are rendered and root-relative links are made absolute. The blog archive lists every post, and the library lists every book with its author, rating, finish dates, and ISBN.
+
+### robots.txt AI rules
+
+`robots.txt` allows all crawlers by default. Optionally publish [content signals](https://contentsignals.org), which say how content may be used once it's accessed, and block specific crawlers entirely:
+
+```toml
+[params.robots]
+blockAgents = ["CCBot"]   # each gets "Disallow: /"
+
+[params.robots.contentSignals]
+search   = true    # search indexes, links, and excerpts
+ai-input = true    # grounding and retrieval for AI answers
+ai-train = false   # training or fine-tuning models
+```
+
+### Structured data
+
+With `jsonld = true`, every page gets one schema.org `@graph` linking:
+
+- a `Person` for `author` (with `authorURL` and `identities` as `sameAs`)
+- the `WebSite`, with a `SearchAction` when a search page exists
+- the current page as a `BlogPosting`, `CollectionPage`, `SearchResultsPage`, or `WebPage`, with publish and modified dates, author, image, keywords, and its Markdown version
+- a `BreadcrumbList`
+- optionally, each book in the library as a `Book` with your rating as a `Review` (`jsonldBooks = true`)
+
+Modified dates in JSON-LD and the sitemap come from `.Lastmod`, which uses each file's last git commit when `enableGitInfo = true`.
 
 ## Shortcodes
 
@@ -275,6 +346,7 @@ Features:
 - **Responsive images** — automatic WebP conversion, srcset generation, lazy loading
 - **Syntax highlighting** — Gruvbox theme, collapsible blocks, filename labels
 - **SEO** — Open Graph, Twitter Cards, Schema.org, Fediverse creator meta tag, canonical URLs, JSON-LD
+- **AI discovery** — llms.txt, llms-full.txt, Markdown versions of pages, robots.txt content signals, `rel="me"` identity links
 - **RSS** — site-wide feed plus a per-section feed for notes
 - **Sitemap** and **robots.txt** included
 
@@ -335,10 +407,13 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 │   ├── shortcodes/         # asset-image shortcode
 │   ├── baseof.html
 │   ├── home.html
+│   ├── home.llms.txt       # llms.txt
+│   ├── home.llmsfull.txt   # llms-full.txt
 │   ├── index.json          # client-side search index
 │   ├── rss.xml
 │   ├── search.html
 │   ├── single.html
+│   ├── single.markdown.md  # Markdown version of each page
 │   ├── sitemap.xml
 │   ├── term.html
 │   └── 404.html
