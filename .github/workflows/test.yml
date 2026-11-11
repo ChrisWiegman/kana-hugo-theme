@@ -6,31 +6,60 @@ on:
     workflow_call:
 
 concurrency:
-    group: ${{ github.workflow }}
+    group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
 jobs:
-    test:
+    lint:
         runs-on: ubuntu-latest
 
         steps:
             - name: Checkout
               uses: actions/checkout@v6
 
+            - name: Set up Node (with npm cache)
+              uses: actions/setup-node@v6
+              with:
+                  node-version: "lts/*"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Lint
+              run: npm run lint
+
+    test:
+        runs-on: ubuntu-latest
+
+        strategy:
+            fail-fast: false
+            matrix:
+                # Keep in sync with min_version in theme.toml.
+                hugo: ["0.169.0"]
+
+        name: test (Hugo ${{ matrix.hugo }})
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+
             - name: Setup Hugo
+              env:
+                  HUGO_VERSION: ${{ matrix.hugo }}
               run: |
-                  HUGO_VERSION=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | jq -r '.tag_name' | sed 's/v//')
-                  wget -O /tmp/hugo.tar.gz "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+                  wget -q -O /tmp/hugo.tar.gz "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
                   tar -xzf /tmp/hugo.tar.gz -C /usr/local/bin hugo
+                  hugo version
 
             - name: Cache Hugo resources
               uses: actions/cache@v5
               with:
                   path: |
                       dev/resources
-                  key: ${{ runner.os }}-hugo-resources-${{ hashFiles('**/go.mod', '**/go.sum', '**/package-lock.json', '**/pnpm-lock.yaml', '**/yarn.lock', 'hugo.toml', 'hugo.yaml', 'hugo.json', 'config/**', 'assets/**') }}
+                  key: ${{ runner.os }}-hugo-${{ matrix.hugo }}-resources-${{ hashFiles('**/go.mod', '**/go.sum', '**/package-lock.json', '**/pnpm-lock.yaml', '**/yarn.lock', 'hugo.toml', 'hugo.yaml', 'hugo.json', 'config/**', 'assets/**') }}
                   restore-keys: |
-                      ${{ runner.os }}-hugo-resources-
+                      ${{ runner.os }}-hugo-${{ matrix.hugo }}-resources-
 
             - name: Prepare Hugo cache directory
               run: mkdir -p .hugo_cache
@@ -40,9 +69,9 @@ jobs:
               with:
                   path: |
                       .hugo_cache
-                  key: ${{ runner.os }}-hugo-cachedir-${{ hashFiles('**/go.mod', '**/go.sum', 'hugo.toml', 'hugo.yaml', 'hugo.json', 'config/**') }}
+                  key: ${{ runner.os }}-hugo-${{ matrix.hugo }}-cachedir-${{ hashFiles('**/go.mod', '**/go.sum', 'hugo.toml', 'hugo.yaml', 'hugo.json', 'config/**') }}
                   restore-keys: |
-                      ${{ runner.os }}-hugo-cachedir-
+                      ${{ runner.os }}-hugo-${{ matrix.hugo }}-cachedir-
 
             - name: Set up Node (with npm cache)
               uses: actions/setup-node@v6
@@ -68,15 +97,16 @@ jobs:
                   PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
 
             - name: Run Playwright tests
-              run: npm run e2e
+              run: npm run e2e:ci
               env:
                   PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
+                  HUGO_CACHEDIR: ${{ github.workspace }}/.hugo_cache
 
             - name: Upload Playwright artifacts on failure
               if: failure()
               uses: actions/upload-artifact@v7
               with:
-                  name: playwright-artifacts
+                  name: playwright-artifacts-hugo-${{ matrix.hugo }}
                   path: |
                       test-results
                       playwright-report
