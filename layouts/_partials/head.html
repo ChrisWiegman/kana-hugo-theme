@@ -9,8 +9,8 @@
 {{- end -}}
 <meta name="description" content="{{- if .IsHome -}}
   {{ .Site.Params.description }}
-{{- else if and (isset .Params "description") (ne (trim .Params.description " ") "") -}}
-  {{ .Params.description }}
+{{- else if ne (trim .Description " ") "" -}}
+  {{ .Description }}
 {{- else -}}
   {{ .Summary | plainify | truncate 160 }}
 {{- end -}}">

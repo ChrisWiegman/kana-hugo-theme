@@ -19,7 +19,7 @@
         {{- end }}
         <atom:link href="https://pubsubhubbub.appspot.com/" rel="hub" />
 
-        <description>{{ .Params.description }}</description>
+        <description>{{ .Description }}</description>
 
         {{- $last := now -}}
         {{- if gt (len $pages) 0 -}}
