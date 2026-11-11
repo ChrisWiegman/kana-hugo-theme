@@ -67,7 +67,7 @@
 		{{- end -}}
 
 		<div class="content-header">
-			<h1 class="post-title p-name">My Library</h1>
+			<h1 class="post-title p-name">{{ .Title | default "My Library" }}</h1>
 			<p class="description">You're viewing all <span class="book-count">{{ len $rows }}</span>
 				{{ if eq (len $rows) 1 }}book
 				{{ else }}books

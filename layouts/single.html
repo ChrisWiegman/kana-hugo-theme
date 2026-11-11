@@ -1,7 +1,7 @@
 {{ define "main" }}
 {{- $showPostMeta := or (eq .Section "posts") (and (eq .Section "drafts") hugo.IsDevelopment) -}}
 {{- $isBlogPost := or (eq .Section "posts") (eq .Section "drafts") -}}
-<article class="h-entry"{{ if $isBlogPost }} itemscope itemtype="http://schema.org/BlogPosting"{{ end }}>
+<article class="h-entry"{{ if $isBlogPost }} itemscope itemtype="https://schema.org/BlogPosting"{{ end }}>
     <div class="container">
         <div class="content-header">
             <h1 class="post-title" itemprop="name headline">{{ if and (eq .Section "drafts") hugo.IsDevelopment }}[DRAFT] {{ end }}{{ .Title }}</h1>
