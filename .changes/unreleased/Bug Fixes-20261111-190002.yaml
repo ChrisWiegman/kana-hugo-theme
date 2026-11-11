@@ -1,3 +1,0 @@
-kind: Bug Fixes
-body: Skip ancestors without a page of their own (such as an unrendered posts section) in JSON-LD breadcrumbs instead of listing them with an empty URL.
-time: 2026-11-11T19:00:02.000000-06:00

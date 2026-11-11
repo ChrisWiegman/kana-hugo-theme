@@ -1,3 +1,0 @@
-kind: Features
-body: Serve content, featured, and asset-image images as AVIF with a WebP fallback in a <picture>, which roughly halves image weight. Configure the formats with params.imageFormats (default ["avif", "webp"]) and set [imaging.avif] quality in the site config (60 is recommended).
-time: 2026-11-11T19:00:00.000000-06:00

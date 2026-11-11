@@ -1,3 +1,0 @@
-kind: Chores
-body: Trim repeated head markup from every page but the home page. rel="me" links and the author's sameAs profiles, plus the site's description, language, publisher, and search action in JSON-LD, now appear only on the home page.
-time: 2026-11-11T19:00:01.000000-06:00
