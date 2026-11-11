@@ -1,0 +1,29 @@
+{{- /*
+	Renders one row of the library's book list. assets/scripts/library.js builds
+	the same markup from the library's JSON data for rows past the first page, so
+	keep the two in sync (e2e/library.spec.js checks that they match).
+*/ -}}
+<div class="book" data-title="{{ .titleKey }}" data-author="{{ .authorKey }}" data-rating="{{ .rating }}"
+	data-finished="{{ .finishedUnix }}" data-years="{{ delimit .years " " }}">
+	<h3 class="book-title">{{ .title }}</h3>
+	<button type="button" class="book-meta book-author" data-filter-author="{{ .authorKey }}">{{ .author }}</button>
+
+	<button type="button" class="book-meta book-rating" data-filter-rating="{{ .rating }}"
+		aria-label="Rating: {{ .rating }} out of 5">
+		{{- range seq 1 5 -}}
+			{{- if le . $.rating -}}★
+			{{- else -}}☆
+			{{- end -}}
+		{{- end -}}</button>
+	{{ partial "books/links.html" .page }}
+
+	<span class="book-meta book-date">
+		{{- if gt (len .finishedDisplays) 0 -}}
+			{{- range .finishedDisplays -}}
+				<span class="date">{{ . }}</span>
+			{{- end -}}
+		{{- else -}}
+			<span class="date date-empty">—</span>
+		{{- end -}}
+	</span>
+</div>

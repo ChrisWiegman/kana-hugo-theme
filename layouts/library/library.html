@@ -51,6 +51,9 @@
 				{{- end -}}
 			{{- end -}}
 
+			{{- $years := slice -}}
+			{{- range $finishedRaw -}}{{- $years = $years | append ((time .).Format "2006") -}}{{- end -}}
+
 			{{- $rows = $rows | append (dict
 				"page" $book
 				"title" $title
@@ -62,9 +65,43 @@
 				"finishedYear" $finishedYear
 				"finishedDisplays" $finishedDisplays
 				"finishedRaw" $finishedRaw
+				"years" $years
 				)
 			-}}
 		{{- end -}}
+
+		{{/* ---- Default order (most recently finished first), matching library.js ---- */}}
+		{{- $rows = sort $rows "titleKey" "asc" -}}
+		{{- $rows = sort $rows "finishedUnix" "desc" -}}
+
+		{{/* ---- Full book list as JSON; only the first page is rendered as HTML ---- */}}
+		{{- $pageSize := int (default 25 site.Params.pagerSize) -}}
+		{{- $data := slice -}}
+		{{- range $rows -}}
+			{{- $links := dict -}}
+			{{- with .page.Params.links -}}
+				{{- $l := . -}}
+				{{- range $key := slice "amazon" "openlibrary" "goodreads" -}}
+					{{- with index $l $key -}}
+						{{- $links = merge $links (dict $key .) -}}
+					{{- end -}}
+				{{- end -}}
+			{{- end -}}
+			{{- $data = $data | append (dict
+				"title" .title
+				"titleKey" .titleKey
+				"author" .author
+				"authorKey" .authorKey
+				"rating" .rating
+				"finished" .finishedUnix
+				"years" .years
+				"dates" .finishedDisplays
+				"links" $links
+				)
+			-}}
+		{{- end -}}
+		{{- $booksPath := strings.TrimPrefix "/" (path.Join .Path "books.json") -}}
+		{{- $booksJSON := resources.FromString $booksPath (jsonify $data) | fingerprint -}}
 
 		<div class="content-header">
 			<h1 class="post-title p-name">{{ .Title | default "My Library" }}</h1>
@@ -183,7 +220,7 @@
 					hidden>View All</button>
 			</h2>
 
-			<div class="books" data-library-table data-page-size="{{ default 25 site.Params.pagerSize }}">
+			<div class="books" data-library-table data-page-size="{{ $pageSize }}" data-books-url="{{ $booksJSON.RelPermalink }}">
 				<div class="book-header">
 					<button type="button" class="book-sort" data-sort="title" aria-sort="none">Title</button>
 					<button type="button" class="book-sort" data-sort="author" aria-sort="none">Author</button>
@@ -192,38 +229,17 @@
 					<button type="button" class="book-sort" data-sort="finished" aria-sort="none">Finished</button>
 				</div>
 
-				{{- range $rows -}}
-					{{- $row := . -}}
-					{{- $book := $row.page -}}
-
-					{{- $years := slice -}}
-					{{- range $row.finishedRaw -}}{{- $years = $years | append ((time .).Format "2006") -}}{{- end -}}
-					<div class="book" data-title="{{ $row.titleKey }}" data-author="{{ $row.authorKey }}"
-						data-rating="{{ $row.rating }}" data-finished="{{ $row.finishedUnix }}" data-years="{{ delimit $years " " }}">
-						<h3 class="book-title">{{ $row.title }}</h3>
-						<button type="button" class="book-meta book-author" data-filter-author="{{ $row.authorKey }}">{{ $row.author }}</button>
-
-						<button type="button" class="book-meta book-rating" data-filter-rating="{{ $row.rating }}"
-							aria-label="Rating: {{ $row.rating }} out of 5">
-							{{- range seq 1 5 -}}
-								{{- if le . $row.rating -}}★
-								{{- else -}}☆
-								{{- end -}}
-							{{- end -}}</button>
-						{{ partial "books/links.html" $book }}
-
-						<span class="book-meta book-date">
-							{{- if gt (len $row.finishedDisplays) 0 -}}
-								{{- range $row.finishedDisplays -}}
-									<span class="date">{{ . }}</span>
-								{{- end -}}
-							{{- else -}}
-								<span class="date date-empty">—</span>
-							{{- end -}}
-						</span>
-					</div>
+				{{- range first $pageSize $rows -}}
+					{{ partial "books/row.html" . }}
 				{{- end -}}
 			</div>
+			{{- if gt (len $rows) $pageSize -}}
+				<noscript>
+					<p class="books-noscript">Showing the {{ $pageSize }} most recently finished books.
+						{{- with .OutputFormats.Get "markdown" }} <a href="{{ .RelPermalink }}">See the full list</a>.{{ end -}}
+					</p>
+				</noscript>
+			{{- end -}}
 		</div>
 	</div>
 	{{- $library := resources.Get "scripts/library.js" -}}

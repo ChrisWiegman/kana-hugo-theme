@@ -227,7 +227,7 @@ asin = "B000000000"
 
 The library page supports filtering by year finished, author, and star rating, plus sorting by title, author, rating, or date. A statistics panel shows books read per year, top authors, and rating distribution.
 
-Books load progressively: an initial batch is shown (controlled by `params.pagerSize`, default 25; this is separate from Hugo's `pagination.pagerSize`, which controls the notes archive), and further batches append to the bottom of the list as you scroll, with a "Load More Books" link as a fallback trigger. Changing a sort or filter starts back at the first batch.
+Books load progressively. The page's HTML includes only the first batch of books, most recently finished first (controlled by `params.pagerSize`, default 25; this is separate from Hugo's `pagination.pagerSize`, which controls the notes archive). The full list is published as a fingerprinted JSON file next to the page (`library/books.<hash>.json`, created automatically) and fetched in the background, and further batches append to the bottom of the list as you scroll, with a "Load More Books" link as a fallback trigger. Only the books on screen are in the DOM. Sorting and filtering cover the whole library and start back at the first batch. Without JavaScript, the page shows the first batch and, when the `markdown` output is enabled, links to the Markdown version for the full list.
 
 Add a `content/library.md` page with `type: library` and `layout: library` to activate it. The page title is used as the library heading.
 
@@ -389,7 +389,7 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 ```
 ├── assets/
 │   ├── scripts/
-│   │   ├── library.js      # book filtering and sorting
+│   │   ├── library.js      # book list loading, filtering, and sorting
 │   │   └── search.js       # client-side search
 │   └── scss/               # component-based stylesheets
 ├── dev/                    # local development site
