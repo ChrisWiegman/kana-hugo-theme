@@ -10,13 +10,13 @@ module.exports = defineConfig({
     },
   ],
   use: {
-    baseURL: "http://127.0.0.1:1313",
+    baseURL: "http://127.0.0.1:1314",
     trace: "on-first-retry",
   },
   webServer: {
     command:
-      "hugo server --source dev --port 1313 --disableFastRender --baseURL http://127.0.0.1:1313",
-    url: "http://127.0.0.1:1313",
+      "hugo server --source dev --port 1314 --disableFastRender --baseURL http://127.0.0.1:1314",
+    url: "http://127.0.0.1:1314",
     reuseExistingServer: !process.env.CI,
     timeout: 60 * 1000,
   },
