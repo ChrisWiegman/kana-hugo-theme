@@ -1,0 +1,3 @@
+kind: Features
+body: Publish a Markdown version of the homepage (add "markdown" to outputs.home) with its intro, the 10 most recent posts, and a link to the archive, linked from the homepage head like other pages.
+time: 2026-11-11T17:00:00.000000-06:00

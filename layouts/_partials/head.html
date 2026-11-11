@@ -26,7 +26,7 @@
 {{- end -}}
 <link rel="canonical" href="{{ .Permalink }}" />
 {{- with .OutputFormats.Get "markdown" }}
-<link rel="alternate" type="text/markdown" href="{{ .Permalink }}" title="{{ $.Title }} (Markdown)" />
+<link rel="alternate" type="text/markdown" href="{{ .Permalink }}" title="{{ $.Title | default site.Title }} (Markdown)" />
 {{- end }}
 {{- with site.Params.author }}
 <meta name="author" content="{{ . }}" />

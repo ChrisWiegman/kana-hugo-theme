@@ -63,7 +63,7 @@ mainSections = ["posts"]
 description  = "Your site description"
 
 [outputs]
-home = ["HTML", "RSS", "JSON", "llms", "llmsfull"]
+home = ["HTML", "RSS", "JSON", "markdown", "llms", "llmsfull"]
 page = ["HTML", "markdown"]
 ```
 
@@ -264,7 +264,7 @@ fullLimit = 0    # posts included in llms-full.txt (default 0 = all)
 
 ### Markdown versions of pages
 
-Add `"markdown"` to `outputs.page` to publish an `index.md` next to each page's `index.html`. Each page links to it with `<link rel="alternate" type="text/markdown">`, and llms.txt and JSON-LD point to it, so agents can read clean text instead of parsing HTML. Shortcodes are rendered and root-relative links are made absolute. The blog archive lists every post, and the library lists every book with its author, rating, finish dates, and ISBN.
+Add `"markdown"` to `outputs.page` to publish an `index.md` next to each page's `index.html`, and to `outputs.home` to publish `/index.md` for the homepage (its intro and the 10 most recent posts). Each page links to it with `<link rel="alternate" type="text/markdown">`, and llms.txt and JSON-LD point to it, so agents can read clean text instead of parsing HTML. Shortcodes are rendered and root-relative links are made absolute. The blog archive lists every post, and the library lists every book with its author, rating, finish dates, and ISBN.
 
 ### robots.txt AI rules
 
@@ -408,6 +408,7 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 │   ├── baseof.html
 │   ├── home.html
 │   ├── home.llms.txt       # llms.txt
+│   ├── home.markdown.md    # Markdown version of the homepage
 │   ├── home.llmsfull.txt   # llms-full.txt
 │   ├── index.json          # client-side search index
 │   ├── rss.xml

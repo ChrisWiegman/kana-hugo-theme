@@ -49,6 +49,26 @@ test('posts publish a Markdown version and link to it', async ({ page, request }
 	expect(body).toMatch(/\[link\]\(https?:\/\/[^)]+\/2025\/12\/lorem-ipsum-post-7\/\)/);
 });
 
+test('home publishes a Markdown version and links to it', async ({ page, request }) => {
+	await page.goto('/');
+
+	const alternate = page.locator('link[rel="alternate"][type="text/markdown"]');
+
+	await expect(alternate).toHaveAttribute('href', /\/index\.md$/);
+	await expect(alternate).toHaveAttribute('title', 'Hugo Theme Development Site (Markdown)');
+
+	const response = await request.get('/index.md');
+
+	expect(response.ok()).toBe(true);
+
+	const body = await response.text();
+
+	expect(body).toMatch(/^---\ntitle: "Hugo Theme Development Site"\n/);
+	expect(body).toContain('## Recent posts');
+	expect(body.match(/^- \[.+\]\([^)]+\/index\.md\) \(\d{4}-\d{2}-\d{2}\)/gm).length).toBeLessThanOrEqual(10);
+	expect(body).toMatch(/\[All posts\]\([^)]*\/blog\/index\.md\)/);
+});
+
 test('library Markdown lists every book', async ({ request }) => {
 	const body = await (await request.get('/library/index.md')).text();
 	const count = Number(body.match(/(\d+) books\./)[1]);
