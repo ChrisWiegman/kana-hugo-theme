@@ -48,3 +48,11 @@ test('library Markdown lists every book', async ({ request }) => {
 	expect(count).toBeGreaterThan(0);
 	expect(body.match(/^- .+ by .+/gm)).toHaveLength(count);
 });
+
+test('robots.txt publishes content signals and blocked agents', async ({ request }) => {
+	const body = await (await request.get('/robots.txt')).text();
+
+	expect(body).toContain('User-agent: *\nContent-Signal: ai-input=yes, ai-train=no, search=yes\nDisallow:\n');
+	expect(body).toContain('User-agent: ExampleBot\nDisallow: /');
+	expect(body).toMatch(/Sitemap: \S+\/sitemap\.xml/);
+});

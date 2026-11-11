@@ -27,6 +27,14 @@ subtitle = "A minimalistic Hugo theme"
 policies = "/policies"
 headerIcon = "images/2025/12/hugo-theme.png"
 
+[params.robots]
+blockAgents = ["ExampleBot"]
+
+[params.robots.contentSignals]
+search = true
+ai-input = true
+ai-train = false
+
 [params.license]
 name = "MIT Licensed"
 title = "The theme code is licensed under the MIT license."

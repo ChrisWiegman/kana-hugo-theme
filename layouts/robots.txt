@@ -1,4 +1,23 @@
+{{- $robots := site.Params.robots | default dict -}}
+{{- $signals := slice -}}
+{{- range $name, $allowed := $robots.contentSignals -}}
+{{- $signals = $signals | append (printf "%s=%s" $name (cond (in (slice true "true" "yes") $allowed) "yes" "no")) -}}
+{{- end -}}
+{{- with $signals -}}
+# Content signals (https://contentsignals.org) state how content on this site
+# may be used once accessed: search = building a search index and showing links
+# and excerpts, ai-input = using content as input to AI models (for example
+# grounding or retrieval-augmented answers), ai-train = training or fine-tuning
+# AI models.
+{{ end -}}
 User-agent: *
+{{ with $signals }}Content-Signal: {{ delimit . ", " }}
+{{ end -}}
 Disallow:
+{{- range $robots.blockAgents }}
+
+User-agent: {{ . }}
+Disallow: /
+{{- end }}
 
 Sitemap: {{ "sitemap.xml" | absURL }}
