@@ -1,0 +1,3 @@
+kind: Features
+body: 'Support optional note permalinks: when note pages are rendered, the archive and notes feed link to them, and they''re marked noindex and kept out of the sitemap.'
+time: 2026-11-11T10:46:00.563345-06:00

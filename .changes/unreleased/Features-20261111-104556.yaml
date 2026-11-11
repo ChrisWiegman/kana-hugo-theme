@@ -1,0 +1,3 @@
+kind: Features
+body: Add llms.txt and llms-full.txt outputs (add "llms" and "llmsfull" to outputs.home) so LLMs and agents can find and read the site's content.
+time: 2026-11-11T10:45:56.271356-06:00

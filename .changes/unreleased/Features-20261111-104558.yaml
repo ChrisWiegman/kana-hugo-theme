@@ -1,0 +1,3 @@
+kind: Features
+body: Expand JSON-LD into a linked schema.org graph with the author, website and search action, breadcrumbs, Markdown links, and optional Book markup for the library (params.jsonldBooks).
+time: 2026-11-11T10:45:58.418473-06:00

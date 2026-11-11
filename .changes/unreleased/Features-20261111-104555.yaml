@@ -1,0 +1,3 @@
+kind: Features
+body: Publish a Markdown version of each page (add "markdown" to outputs.page), linked from the page head, with the blog archive and library rendered as Markdown lists.
+time: 2026-11-11T10:45:55.194753-06:00
