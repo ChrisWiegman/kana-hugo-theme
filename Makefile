@@ -1,5 +1,7 @@
 ARGS = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
 
+export PATH := $(CURDIR)/node_modules/.bin:$(PATH)
+
 .PHONY: change
 change: install
 	npx changie new
