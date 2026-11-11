@@ -8,7 +8,7 @@ A warm, earthy dark Hugo theme for personal blogs. Features client-side search, 
 
 ## Requirements
 
-- [Hugo](https://gohugo.io) extended, v0.152.0 or later
+- [Hugo](https://gohugo.io) extended, v0.169.0 or later
 - [Node.js](https://nodejs.org/en) + [npm](https://www.npmjs.com) (for Playwright tests and tooling only)
 
 ## Installation
@@ -72,19 +72,21 @@ The `JSON` output on `home` is required for client-side search to work.
 
 | Parameter | Type | Description |
 |---|---|---|
-| `author` | string | Author name used as `dc:creator` in RSS feeds |
+| `author` | string | Author name used as `dc:creator` in RSS feeds and in JSON-LD (omitted when unset) |
 | `description` | string | Site description for meta tags |
 | `subtitle` | string | Subtitle appended to the homepage title tag |
-| `mainSections` | string[] | Content sections included in the homepage post list and RSS feed |
-| `headerIcon` | string | Path (relative to `assets/`) to the icon shown in the site header |
+| `mainSections` | string[] | Content sections included in the homepage post list, RSS feed, search index, and JSON-LD `BlogPosting` markup |
+| `headerIcon` | string | Path (relative to `assets/`) to the icon shown in the site header. A missing file logs a warning instead of failing the build |
 | `imageSizes` | int[] | Image widths (px) to generate in srcset (e.g. `[850, 710, 300]`) |
-| `imageSizeString` | string | The HTML `sizes` attribute for responsive images. Must be ordered **smallest breakpoint first** with no-condition default last (e.g. `"(max-width: 300px) 300w, (max-width: 710px) 710w, 850w"`) |
+| `imageSizeString` | string | The HTML `sizes` attribute for responsive images. Must be ordered **smallest breakpoint first** with no-condition default last (e.g. `"(max-width: 300px) 300px, (max-width: 710px) 710px, 850px"`) |
 | `OpenGraph` | bool | Emit Open Graph meta tags |
 | `TwitterCards` | bool | Emit Twitter Card meta tags |
-| `jsonld` | bool | Emit JSON-LD meta tags |
+| `jsonld` | bool | Emit JSON-LD meta tags (off by default) |
 | `FediverseCreator` | string | Fediverse handle for `fediverse:creator` meta tag (e.g. `"@user@instance.social"`) |
 | `MobileWebAppTitle` | string | `apple-mobile-web-app-title` meta value |
 | `policies` | string | Path to a policies page linked in the footer |
+| `pagerSize` | int | Number of books shown per batch in the library (default `25`) |
+| `websubHub` | string | WebSub hub advertised in RSS feeds (default `"https://pubsubhubbub.appspot.com/"`; set to `""` to omit it) |
 | `license` | object | `name`, `title`, and `link` shown in the footer (see below) |
 
 ### License Footer
@@ -167,17 +169,25 @@ rating   = 4
 
 finished = ["2024-10-23"]   # multiple dates supported for re-reads
 
+cover    = "/images/books/book-title.jpg"   # optional
+
 [links]
 amazon      = "https://www.amazon.com/..."
 openlibrary = "https://openlibrary.org/..."
 goodreads   = "https://www.goodreads.com/..."
+
+[reference]
+isbn = "9780000000000"
+asin = "B000000000"
 ```
+
+`cover` and `reference` are stored for use by your own templates; the library page does not display them yet. New books can be scaffolded with `hugo new books/author-name/book-title.md`, which uses the `books` archetype.
 
 The library page supports filtering by year finished, author, and star rating, plus sorting by title, author, rating, or date. A statistics panel shows books read per year, top authors, and rating distribution.
 
-Books load progressively: an initial batch is shown (controlled by `site.Params.pagerSize`, default 25), and further batches append to the bottom of the list as you scroll, with a "Load More Books" link as a fallback trigger. Changing a sort or filter starts back at the first batch.
+Books load progressively: an initial batch is shown (controlled by `params.pagerSize`, default 25; this is separate from Hugo's `pagination.pagerSize`, which controls the notes archive), and further batches append to the bottom of the list as you scroll, with a "Load More Books" link as a fallback trigger. Changing a sort or filter starts back at the first batch.
 
-Add a `content/library.md` page with `layout: library` to activate it.
+Add a `content/library.md` page with `type: library` and `layout: library` to activate it. The page title is used as the library heading.
 
 ### Search
 
@@ -213,12 +223,13 @@ Inserts a responsive image from `assets/` with automatic WebP conversion.
 
 ### Images
 
-Markdown images are automatically rendered with:
+Markdown images are resolved from the page bundle first, then from `assets/`, and automatically rendered with:
 
-- Responsive `srcset` based on `params.imageSizes`
+- Responsive WebP `srcset` based on `params.imageSizes` (sizes wider than the original image are skipped, so images are never upscaled)
 - Lazy loading (`loading="lazy"`)
-- WebP format output
 - `<figure>`/`<figcaption>` for block images with a title
+
+Images the theme cannot process (remote URLs, files in `static/`, SVGs) are rendered as a plain `<img>` instead of failing the build.
 
 ### Code Blocks
 
@@ -264,7 +275,15 @@ The site will be available at `http://localhost:1313`.
 make test
 ```
 
-Runs Playwright browser tests against the local dev site. Requires `hugo` on your `PATH`.
+Runs Playwright browser tests (Chromium) against the dev site on port 1314. Requires `hugo` on your `PATH`.
+
+### Linting
+
+```sh
+make lint
+```
+
+Runs ESLint over the theme scripts, Playwright tests, and tooling scripts.
 
 ### Updating Screenshots
 
@@ -288,16 +307,21 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 ├── e2e/                    # Playwright tests
 ├── images/                 # theme screenshots
 ├── layouts/
-│   ├── _default/           # generic list templates
+│   ├── _default/           # generic list and JSON templates
 │   ├── _markup/            # image and code block render hooks
 │   ├── blog/               # blog archive template
 │   ├── library/            # reading library template
 │   ├── notes/              # notes archive and RSS feed
-│   ├── partials/           # shared template fragments
+│   ├── _partials/          # shared template fragments
 │   ├── shortcodes/         # asset-image shortcode
+│   ├── baseof.html
 │   ├── home.html
+│   ├── index.json          # client-side search index
+│   ├── rss.xml
 │   ├── search.html
 │   ├── single.html
+│   ├── sitemap.xml
+│   ├── term.html
 │   └── 404.html
 └── scripts/
     └── screenshots.mjs     # screenshot generation script
@@ -305,7 +329,7 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 
 ## Formatting
 
-Templates in `layouts/` are formatted with Prettier using the `go-template` parser. Use the Prettier VS Code extension (configured in `.vscode/settings.json`) to avoid breaking Hugo template markup.
+Templates in `layouts/` are formatted with [gotmplfmt](https://github.com/gohugoio/gotmplfmt). `make install` installs a pinned version into `./bin`, which is where the gotmplfmt VS Code extension (configured in `.vscode/settings.json`) looks for it.
 
 ## License
 
