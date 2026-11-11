@@ -12,8 +12,12 @@ node_modules/
 /dev/public
 /dev/resources
 /dev/.hugo_build.lock
-.public/
 
-# ignore Platwright test files
+# Ignore Playwright test files
 /test-results
 /playwright-report
+
+# Local tooling
+/bin
+/build
+.claude/
