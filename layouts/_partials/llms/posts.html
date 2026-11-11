@@ -1,0 +1,4 @@
+{{- /* Returns published posts from params.mainSections, newest first. */ -}}
+{{- $main := site.Params.mainSections | default (slice "posts") -}}
+{{- $sections := cond (reflect.IsSlice $main) $main (slice $main) -}}
+{{- return (where site.RegularPages "Section" "in" $sections).ByDate.Reverse -}}

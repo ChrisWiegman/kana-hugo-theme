@@ -1,0 +1,11 @@
+{{- /*
+  Returns a page's content as Markdown for agent-facing outputs (llms-full.txt
+  and per-page Markdown). Shortcodes are rendered; Markdown is left as written.
+  Root-relative links and image paths are made absolute so they still resolve
+  when the text is read outside the site.
+*/ -}}
+{{- $base := strings.TrimSuffix "/" site.BaseURL -}}
+{{- $content := string .RenderShortcodes -}}
+{{- $content = replaceRE `\]\((/[^)\s]*)` (printf "](%s$1" $base) $content -}}
+{{- $content = replaceRE `(src|href)="(/[^"]*)"` (printf `$1="%s$2"` $base) $content -}}
+{{- return (strings.TrimSpace $content) -}}

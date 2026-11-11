@@ -25,6 +25,9 @@
 {{- end -}}
 {{- end -}}
 <link rel="canonical" href="{{ .Permalink }}" />
+{{- with .OutputFormats.Get "markdown" }}
+<link rel="alternate" type="text/markdown" href="{{ .Permalink }}" title="{{ $.Title }} (Markdown)" />
+{{- end }}
 {{ $options := (dict "targetPath" "css/main.css" "outputStyle" "compressed" "transpiler" "dartsass") }}
 {{ $style := resources.Get "scss/main.scss" | css.Sass $options | minify | fingerprint }}
 <link rel="stylesheet" href="{{ $style.Permalink }}" integrity="{{ $style.Data.Integrity }}" />

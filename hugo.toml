@@ -6,3 +6,9 @@
 [params]
   imageSizes = [1700, 1420, 850, 710, 600, 300]
   imageSizeString = "(max-width: 882px) calc(100vw - 2rem), 850px"
+
+# Sites that define their own [outputs] must add "markdown" to page to publish
+# Markdown versions of pages; Hugo doesn't merge [outputs] from themes.
+[outputs]
+  home = ["html", "rss", "json"]
+  page = ["html", "markdown"]
