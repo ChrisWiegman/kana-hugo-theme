@@ -1,3 +1,0 @@
-kind: Bug Fixes
-body: Notes RSS feed uses the configured author instead of a hard-coded name, and calculates note links from the site's pagination size instead of assuming 25.
-time: 2026-11-11T10:20:33.502239-06:00

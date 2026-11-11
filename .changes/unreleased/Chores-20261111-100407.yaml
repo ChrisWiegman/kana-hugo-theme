@@ -1,3 +1,0 @@
-kind: Chores
-body: Run e2e tests and screenshots on a dedicated port (1314) so they no longer reuse another Hugo server running on 1313.
-time: 2026-11-11T10:04:07.087628-06:00

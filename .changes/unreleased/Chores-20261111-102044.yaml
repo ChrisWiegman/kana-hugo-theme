@@ -1,3 +1,0 @@
-kind: Chores
-body: Install a pinned gotmplfmt into ./bin so the VS Code formatter finds it, install only Chromium for tests, and make the local release zip match the GitHub release.
-time: 2026-11-11T10:20:44.244025-06:00

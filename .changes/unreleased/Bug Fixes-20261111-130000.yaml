@@ -1,3 +1,0 @@
-kind: Bug Fixes
-body: Render the header icon and asset-image shortcode images at 2x their displayed size so they stay sharp on high-density screens.
-time: 2026-11-11T13:00:00.000000-06:00

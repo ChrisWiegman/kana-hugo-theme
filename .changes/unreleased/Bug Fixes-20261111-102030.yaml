@@ -1,3 +1,0 @@
-kind: Bug Fixes
-body: Fix the image sizes example and dev config, which used invalid "w" units in the sizes attribute so browsers ignored it and downloaded oversized images.
-time: 2026-11-11T10:20:30.280317-06:00

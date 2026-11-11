@@ -1,3 +1,0 @@
-kind: Features
-body: 'Add optional AI crawler rules to robots.txt: Content-Signal preferences (params.robots.contentSignals) and fully blocked user agents (params.robots.blockAgents).'
-time: 2026-11-11T10:45:57.344438-06:00

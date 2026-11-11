@@ -1,3 +1,0 @@
-kind: Chores
-body: Lint the whole repository (tests and tooling scripts included) and run lint in CI.
-time: 2026-11-11T10:20:42.093611-06:00
