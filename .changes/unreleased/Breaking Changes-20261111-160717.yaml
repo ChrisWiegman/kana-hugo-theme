@@ -1,3 +1,0 @@
-kind: Breaking Changes
-body: The syntax highlighting stylesheet now only colors the Chroma token classes used on chriswiegman.com; other tokens use the base code color.
-time: 2026-11-11T16:07:17.000000-06:00

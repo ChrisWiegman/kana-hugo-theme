@@ -1,3 +1,0 @@
-kind: Bug Fixes
-body: Markdown front matter and the Markdown alternate link's title fall back to the site title for pages without one, such as a homepage whose _index.md sets no title.
-time: 2026-11-11T17:00:01.000000-06:00
