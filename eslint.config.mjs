@@ -89,83 +89,60 @@ const sharedRules = {
 };
 
 export default [
-  {
-    ignores: [
-      'public/**',
-      'resources/**',
-      'static/reveal.js/**',
-      'static/slides/**',
-      'node_modules/**',
-      'themes/**',
-    ],
-  },
-  js.configs.recommended,
-  // Cloudflare Worker source files (ES modules, browser-like Web APIs)
-  {
-    files: ['stats/*.js'],
-    plugins: { '@stylistic': stylistic },
-    languageOptions: {
-      ecmaVersion: 2023,
-      sourceType: 'module',
-      globals: {
-        ...globals.browser,
-      },
-    },
-    rules: sharedRules,
-  },
-  // Node.js CommonJS test files
-  {
-    files: ['stats/tests/*.test.cjs'],
-    plugins: { '@stylistic': stylistic },
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'commonjs',
-      globals: {
-        ...globals.node,
-      },
-    },
-    rules: sharedRules,
-  },
-  // Browser theme scripts (IIFE, script mode)
-  {
-    files: ['assets/scripts/*.js'],
-    plugins: { '@stylistic': stylistic },
-    languageOptions: {
-      ecmaVersion: 2020,
-      sourceType: 'script',
-      globals: {
-        ...globals.browser,
-      },
-    },
-    rules: sharedRules,
-  },
-  // Playwright config and E2E tests (Node.js)
-  {
-    files: [
-      'playwright.config.js',
-      'e2e/**/*.js',
-    ],
-    plugins: { '@stylistic': stylistic },
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'commonjs',
-      globals: {
-        ...globals.node,
-      },
-    },
-    rules: sharedRules,
-  },
-  // Node.js utility scripts (ES modules)
-  {
-    files: ['scripts/*.mjs'],
-    plugins: { '@stylistic': stylistic },
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'module',
-      globals: {
-        ...globals.node,
-      },
-    },
-    rules: sharedRules,
-  },
+	{
+		ignores: [
+			'bin/**',
+			'dev/public/**',
+			'dev/resources/**',
+			'node_modules/**',
+			'playwright-report/**',
+			'test-results/**',
+		],
+	},
+	js.configs.recommended,
+	// Browser theme scripts (IIFE, script mode)
+	{
+		files: ['assets/scripts/*.js'],
+		plugins: { '@stylistic': stylistic },
+		languageOptions: {
+			ecmaVersion: 2020,
+			sourceType: 'script',
+			globals: {
+				...globals.browser,
+			},
+		},
+		rules: sharedRules,
+	},
+	// Playwright config and E2E tests (Node.js)
+	{
+		files: [
+			'playwright.config.js',
+			'e2e/**/*.js',
+		],
+		plugins: { '@stylistic': stylistic },
+		languageOptions: {
+			ecmaVersion: 2022,
+			sourceType: 'commonjs',
+			globals: {
+				...globals.node,
+			},
+		},
+		rules: sharedRules,
+	},
+	// Node.js utility scripts (ES modules); these are CLIs, so console output is expected
+	{
+		files: ['scripts/*.mjs', 'eslint.config.mjs'],
+		plugins: { '@stylistic': stylistic },
+		languageOptions: {
+			ecmaVersion: 2022,
+			sourceType: 'module',
+			globals: {
+				...globals.node,
+			},
+		},
+		rules: {
+			...sharedRules,
+			'no-console': 'off',
+		},
+	},
 ];

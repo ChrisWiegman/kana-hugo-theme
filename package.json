@@ -19,12 +19,11 @@
   "license": "MIT",
   "author": "Chris Wiegman",
   "type": "commonjs",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "playwright test",
     "e2e": "playwright test",
     "e2e:ci": "playwright test --reporter=dot",
-    "lint": "eslint ./assets/scripts"
+    "lint": "eslint ."
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
