@@ -48,7 +48,8 @@
 {{- printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>\n" | safeHTML -}}
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 {{- range $pages -}}
-    {{- $lastmod := .Date -}}
+    {{- /* Lastmod comes from git when enableGitInfo is set, falling back to the front matter dates. */ -}}
+    {{- $lastmod := .Lastmod -}}
     {{- if and (eq .Kind "home") (ne $homeDate "") -}}
         {{- $lastmod = $homeDate -}}
     {{- else if and (eq .Kind "section") (eq .Section "notes") (ne $notesDate "") -}}

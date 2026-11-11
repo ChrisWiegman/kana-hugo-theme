@@ -65,6 +65,13 @@ test('robots.txt publishes content signals and blocked agents', async ({ request
 	expect(body).toMatch(/Sitemap: \S+\/sitemap\.xml/);
 });
 
+test('head identifies the author and their profiles', async ({ page }) => {
+	await page.goto('/2026/01/hugo-development-post/');
+
+	await expect(page.locator('meta[name="author"]')).toHaveAttribute('content', 'Chris Wiegman');
+	await expect(page.locator('link[rel="me"]')).toHaveCount(2);
+});
+
 test('home JSON-LD describes the site, author, and search action', async ({ request }) => {
 	const graph = jsonLd(await (await request.get('/')).text());
 	const person = graph.find((n) => n['@type'] === 'Person');
