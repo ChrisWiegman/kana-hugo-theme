@@ -17,7 +17,11 @@
         {{ with .OutputFormats.Get "RSS" -}}
             <atom:link href="{{ .Permalink }}" rel="self" type="{{ .MediaType.Type }}" />
         {{- end }}
-        <atom:link href="https://pubsubhubbub.appspot.com/" rel="hub" />
+        {{- $hub := "https://pubsubhubbub.appspot.com/" -}}
+        {{- if isset site.Params "websubhub" }}{{ $hub = site.Params.websubHub }}{{ end -}}
+        {{- with $hub }}
+        <atom:link href="{{ . }}" rel="hub" />
+        {{- end }}
 
         <description>{{ .Description }}</description>
 
