@@ -7,15 +7,8 @@
             <p class="description"><span class="post-count">{{ $pages.Len }}</span> posts found.</p>
         </div>
         {{ partial "form.html" . }}
-        {{- if eq .Data.Singular .Kind "category" -}}
-        <div class="content-categories">
-            <div class="categories"> Filter Posts:
-                <a href="/blog" class="category">All Posts</a>
-                {{ range $name, $taxonomy := .Site.Taxonomies.categories }}
-                <a href="/categories/{{ $name }}/" class="category">{{ title $name }}</a>
-                {{- end }}
-            </div>
-        </div>
+        {{- if eq .Data.Singular "category" -}}
+        {{ partial "filter.html" . }}
         {{- end -}}
         {{ partial "posts-grouped.html" $pages }}
     </div>
