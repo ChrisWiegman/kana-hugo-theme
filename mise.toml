@@ -1,5 +1,0 @@
-# Hugo for `make dev` and the Playwright tests. Tracks the latest release, like
-# CI (.github/workflows/test.yml), so theme breakage from a new Hugo shows up
-# early; `rup` keeps it current.
-[tools]
-hugo-extended = "latest"
