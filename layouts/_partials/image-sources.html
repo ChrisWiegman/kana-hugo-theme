@@ -1,0 +1,19 @@
+{{- /*
+  Returns the <source> elements for a <picture>, one per preferred format in
+  site.Params.imageFormats (all but the last, which the <img> itself uses).
+  Returns an empty string when there is only one format, so callers can skip
+  the <picture> wrapper.
+
+  Takes a dict with "image" (the resource) and "sizes" (the sizes attribute,
+  omitted when empty).
+*/ -}}
+{{- $image := .image -}}
+{{- $sizes := "" -}}
+{{- with .sizes }}{{ $sizes = printf ` sizes="%s"` . }}{{ end -}}
+{{- $out := "" -}}
+{{- range $format := after 1 (partial "image-formats.html" $image) -}}
+{{- with partial "image-srcset.html" (dict "image" $image "format" $format) -}}
+{{- $out = printf `%s<source type="image/%s" srcset="%s"%s />` $out $format . $sizes -}}
+{{- end -}}
+{{- end -}}
+{{- return $out -}}

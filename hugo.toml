@@ -5,6 +5,7 @@
 
 [params]
   imageSizes = [1700, 1420, 850, 710, 600, 300]
+  imageFormats = ["avif", "webp"]
   imageSizeString = "(max-width: 882px) calc(100vw - 2rem), 850px"
 
 # Output formats used for AI and agent discovery. Sites that define their own

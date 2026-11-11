@@ -81,6 +81,7 @@ The `JSON` output on `home` is required for client-side search to work. The `llm
 | `mainSections` | string[] | Content sections included in the homepage post list, RSS feed, search index, and JSON-LD `BlogPosting` markup |
 | `headerIcon` | string | Path (relative to `assets/`) to the icon shown in the site header. A missing file logs a warning instead of failing the build |
 | `imageSizes` | int[] | Image widths (px) to generate in srcset. Defaults to `[1700, 1420, 850, 710, 600, 300]`, which covers the 850px content column at 1x and 2x |
+| `imageFormats` | string[] | Formats to encode content images in, most preferred first. The last one is the `<img>` fallback and the others become `<picture>` `<source>`s. Defaults to `["avif", "webp"]`; set `["webp"]` for plain `<img>` tags and faster builds. GIFs only use the fallback |
 | `imageSizeString` | string | The HTML `sizes` attribute for responsive images: the image's displayed width as a CSS length (`px`, `vw`, or `calc()`, never `w`). Defaults to `"(max-width: 882px) calc(100vw - 2rem), 850px"`, which matches the theme's content column |
 | `OpenGraph` | bool | Emit Open Graph meta tags |
 | `TwitterCards` | bool | Emit Twitter Card meta tags |
@@ -110,6 +111,11 @@ quality = 85
 quality = 85
 # For sites that are mostly screenshots or text, also add:
 # hint = "drawing"
+
+# AVIF's quality scale runs lower than WebP's: 60 looks the same as WebP 85
+# at roughly half the size. Higher values can produce files larger than WebP.
+[imaging.avif]
+quality = 60
 ```
 
 After changing these, delete `resources/_gen/images` so Hugo regenerates its cached images.
@@ -328,7 +334,7 @@ Inserts a responsive image from `assets/` with automatic WebP conversion.
 
 Markdown images are resolved from the page bundle first, then from `assets/`, and automatically rendered with:
 
-- Responsive WebP `srcset` based on `params.imageSizes` (sizes wider than the original image are skipped, so images are never upscaled)
+- Responsive AVIF and WebP `srcset`s (in a `<picture>`) based on `params.imageSizes` and `params.imageFormats` (sizes wider than the original image are skipped, so images are never upscaled)
 - Lazy loading (`loading="lazy"`)
 - `<figure>`/`<figcaption>` for block images with a title
 
@@ -356,7 +362,7 @@ Features:
 - **Client-side search** — no server needed; indexes title, tags, categories, and content
 - **Reading library** — filterable, sortable book list with statistics
 - **Notes** — short-form content with its own RSS feed
-- **Responsive images** — automatic WebP conversion, srcset generation, lazy loading
+- **Responsive images** — automatic AVIF and WebP conversion, srcset generation, lazy loading
 - **Syntax highlighting** — Gruvbox theme, collapsible blocks, filename labels
 - **SEO** — Open Graph, Twitter Cards, Schema.org, Fediverse creator meta tag, canonical URLs, JSON-LD
 - **AI discovery** — llms.txt, llms-full.txt, Markdown versions of pages, robots.txt content signals, `rel="me"` identity links

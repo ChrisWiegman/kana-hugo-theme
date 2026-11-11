@@ -2,6 +2,8 @@
   Resolve the image from the page bundle first, then the global assets
   directory. Anything that can't be resolved (remote URLs, files in static/)
   is rendered as a plain <img> so the build never fails on a missing resource.
+  Processed images get a <picture> with a <source> per preferred format in
+  site.Params.imageFormats.
 */ -}}
 {{- $u := urls.Parse .Destination -}}
 {{- $image := "" -}}
@@ -13,19 +15,21 @@
 {{- $width := "" -}}
 {{- $height := "" -}}
 {{- $srcSet := "" -}}
+{{- $sources := "" -}}
 {{- with $image -}}
 {{- $src = .RelPermalink -}}
 {{- if and (eq .ResourceType "image") (ne .MediaType.SubType "svg") -}}
 {{- $width = .Width -}}
 {{- $height = .Height -}}
 {{- $srcSet = partial "image-srcset.html" . -}}
+{{- if $srcSet }}{{ $sources = partial "image-sources.html" (dict "image" . "sizes" site.Params.imageSizeString) }}{{ end -}}
 {{- end -}}
 {{- end -}}
 {{- if .IsBlock -}}
 <figure>
-    <img{{ with .Title }} class="with-caption"{{ end }}{{ with $width }} width="{{ . }}"{{ end }}{{ with $height }} height="{{ . }}"{{ end }} src="{{ $src }}" alt="{{ .PlainText }}" decoding="async" loading="lazy"{{ with $srcSet }} srcset="{{ . }}" sizes="{{ site.Params.imageSizeString }}"{{ end }} />
+    {{ with $sources }}<picture>{{ . | safeHTML }}{{ end }}<img{{ with .Title }} class="with-caption"{{ end }}{{ with $width }} width="{{ . }}"{{ end }}{{ with $height }} height="{{ . }}"{{ end }} src="{{ $src }}" alt="{{ .PlainText }}" decoding="async" loading="lazy"{{ with $srcSet }} srcset="{{ . }}" sizes="{{ site.Params.imageSizeString }}"{{ end }} />{{ with $sources }}</picture>{{ end }}
     {{- with .Title }}<figcaption>{{ . }}</figcaption>{{- end -}}
 </figure>
 {{- else -}}
-<img{{ with $width }} width="{{ . }}"{{ end }}{{ with $height }} height="{{ . }}"{{ end }} src="{{ $src }}" alt="{{ .PlainText }}" decoding="async" loading="lazy"{{ with $srcSet }} srcset="{{ . }}" sizes="{{ site.Params.imageSizeString }}"{{ end }}{{ with .Title }} title="{{ . }}"{{ end }} />
+{{ with $sources }}<picture>{{ . | safeHTML }}{{ end }}<img{{ with $width }} width="{{ . }}"{{ end }}{{ with $height }} height="{{ . }}"{{ end }} src="{{ $src }}" alt="{{ .PlainText }}" decoding="async" loading="lazy"{{ with $srcSet }} srcset="{{ . }}" sizes="{{ site.Params.imageSizeString }}"{{ end }}{{ with .Title }} title="{{ . }}"{{ end }} />{{ with $sources }}</picture>{{ end }}
 {{- end -}}

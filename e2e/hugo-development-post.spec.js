@@ -39,6 +39,11 @@ test('hugo development post renders key content types', async ({ page }) => {
 	await expect(image).toHaveAttribute('sizes', '(max-width: 882px) calc(100vw - 2rem), 850px');
 	await expect(image).toHaveAttribute('loading', 'lazy');
 	await expect(image).not.toHaveAttribute('fetchpriority');
+
+	const avif = page.locator('figure picture source[type=\'image/avif\']').first();
+
+	await expect(avif).toHaveAttribute('srcset', /\.avif 1700w/);
+	await expect(avif).toHaveAttribute('sizes', '(max-width: 882px) calc(100vw - 2rem), 850px');
 	await expect(page.locator('figure figcaption')).toContainText(
 		'This is an image with alt text and a caption',
 	);

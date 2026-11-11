@@ -1,10 +1,22 @@
 {{- /*
-  Builds a WebP srcset string for an image resource from site.Params.imageSizes.
+  Builds a srcset string for an image resource from site.Params.imageSizes.
   Widths larger than the original image are skipped so images are never
   upscaled; the original width is used instead when any were skipped.
   Returns an empty string when no sizes are configured.
+
+  Pass the image resource itself for the fallback format (the last entry in
+  site.Params.imageFormats, WebP by default), or a dict with "image" and
+  "format" to build the srcset in another format.
 */ -}}
 {{- $image := . -}}
+{{- $format := "" -}}
+{{- if reflect.IsMap . -}}
+{{- $image = .image -}}
+{{- $format = .format -}}
+{{- end -}}
+{{- if not $format -}}
+{{- $format = index (partial "image-formats.html" $image) 0 -}}
+{{- end -}}
 {{- $entries := slice -}}
 {{- $widths := slice -}}
 {{- range site.Params.imageSizes -}}
@@ -12,7 +24,7 @@
 {{- if gt $w $image.Width -}}{{- $w = $image.Width -}}{{- end -}}
 {{- if not (in $widths $w) -}}
 {{- $widths = $widths | append $w -}}
-{{- $url := ($image.Resize (printf "%dx webp" $w)).Permalink -}}
+{{- $url := ($image.Resize (printf "%dx %s" $w $format)).Permalink -}}
 {{- $entries = $entries | append (printf "%s %dw" $url $w) -}}
 {{- end -}}
 {{- end -}}

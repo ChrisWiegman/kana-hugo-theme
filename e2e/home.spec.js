@@ -41,6 +41,7 @@ test('homepage hero image renders via asset-image shortcode', async ({
 	await expect(heroImg).toHaveAttribute('width', '225');
 	await expect(heroImg).toHaveAttribute('height', '225');
 	await expect(heroImg).toHaveJSProperty('naturalWidth', 450);
+	await expect(page.locator('article.hero .content picture source[type=\'image/avif\']')).toHaveAttribute('srcset', /\.avif$/);
 });
 
 test('homepage hero image keeps its width before it loads', async ({ page }) => {

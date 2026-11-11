@@ -1,0 +1,17 @@
+{{- /*
+  Returns the formats to encode an image in, fallback first: the last entry
+  of site.Params.imageFormats (the format the <img> uses), followed by the
+  rest in preference order (each becomes a <picture> <source>).
+
+  GIFs only get the fallback format, since Hugo can't encode animated AVIF.
+*/ -}}
+{{- $formats := site.Params.imageFormats | default (slice "webp") -}}
+{{- if not (reflect.IsSlice $formats) }}{{ $formats = slice $formats }}{{ end -}}
+{{- $fallback := index $formats (sub (len $formats) 1) -}}
+{{- $result := slice $fallback -}}
+{{- if ne .MediaType.SubType "gif" -}}
+{{- range first (sub (len $formats) 1) $formats -}}
+{{- $result = $result | append . -}}
+{{- end -}}
+{{- end -}}
+{{- return $result -}}

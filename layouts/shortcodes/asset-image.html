@@ -5,5 +5,9 @@
 {{- $image := resources.Get $src -}}
 {{- /* Render at 2x for high-density screens, capped at the source width to avoid upscaling. */ -}}
 {{- $scale := math.Min 2 (div (float $image.Width) $width) | math.Max 1 -}}
-{{- $image = $image.Resize (printf "%dx%d webp" (int (math.Round (mul $width $scale))) (int (math.Round (mul $height $scale)))) -}}
-<img src="{{ $image.RelPermalink }}" width="{{ $width }}" height="{{ $height }}" alt="{{ $alt }}" />
+{{- $size := printf "%dx%d" (int (math.Round (mul $width $scale))) (int (math.Round (mul $height $scale))) -}}
+{{- $formats := partial "image-formats.html" $image -}}
+{{- $fallback := $image.Resize (printf "%s %s" $size (index $formats 0)) -}}
+{{- with after 1 $formats }}<picture>{{ range . }}<source type="image/{{ . }}" srcset="{{ ($image.Resize (printf "%s %s" $size .)).RelPermalink }}" />{{ end }}{{ end -}}
+<img src="{{ $fallback.RelPermalink }}" width="{{ $width }}" height="{{ $height }}" alt="{{ $alt }}" />
+{{- with after 1 $formats }}</picture>{{ end -}}

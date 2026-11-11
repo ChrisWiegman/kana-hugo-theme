@@ -24,8 +24,10 @@
             {{- $image := resources.Get $featured_image -}}
             {{- with $image -}}
             {{- $webpSrcSet := partial "image-srcset.html" $image -}}
+            {{- $sources := "" -}}
+            {{- if $webpSrcSet }}{{ $sources = partial "image-sources.html" (dict "image" $image "sizes" site.Params.imageSizeString) }}{{ end -}}
             <figure>
-                <img width="{{ $image.Width }}" height="{{ $image.Height }}" src="{{ $image.RelPermalink }}" alt="{{ $.Title }}" decoding="async" fetchpriority="high"{{ if $webpSrcSet }} srcset="{{ $webpSrcSet }}" sizes="{{ site.Params.imageSizeString }}"{{ end }} />
+                {{ with $sources }}<picture>{{ . | safeHTML }}{{ end }}<img width="{{ $image.Width }}" height="{{ $image.Height }}" src="{{ $image.RelPermalink }}" alt="{{ $.Title }}" decoding="async" fetchpriority="high"{{ if $webpSrcSet }} srcset="{{ $webpSrcSet }}" sizes="{{ site.Params.imageSizeString }}"{{ end }} />{{ with $sources }}</picture>{{ end }}
             </figure>
             {{- end -}}
             {{- end -}}

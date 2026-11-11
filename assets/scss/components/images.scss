@@ -5,3 +5,9 @@ img {
   vertical-align: bottom;
   border-radius: 12px;
 }
+
+// <picture> only offers format choices; let the <img> inside lay out as if it
+// weren't wrapped, so img rules (flex items, figure tables) keep applying.
+picture {
+  display: contents;
+}
