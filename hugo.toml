@@ -2,3 +2,7 @@
   [module.hugoVersion]
     extended = true
     min = "0.169.0"
+
+[params]
+  imageSizes = [1700, 1420, 850, 710, 600, 300]
+  imageSizeString = "(max-width: 882px) calc(100vw - 2rem), 850px"

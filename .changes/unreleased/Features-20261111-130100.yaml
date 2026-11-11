@@ -1,0 +1,3 @@
+kind: Features
+body: Provide default imageSizes and imageSizeString values that match the theme's layout, including 2x image widths for high-density screens.
+time: 2026-11-11T13:01:00.000000-06:00

@@ -77,8 +77,8 @@ The `JSON` output on `home` is required for client-side search to work.
 | `subtitle` | string | Subtitle appended to the homepage title tag |
 | `mainSections` | string[] | Content sections included in the homepage post list, RSS feed, search index, and JSON-LD `BlogPosting` markup |
 | `headerIcon` | string | Path (relative to `assets/`) to the icon shown in the site header. A missing file logs a warning instead of failing the build |
-| `imageSizes` | int[] | Image widths (px) to generate in srcset (e.g. `[850, 710, 300]`) |
-| `imageSizeString` | string | The HTML `sizes` attribute for responsive images. Must be ordered **smallest breakpoint first** with no-condition default last (e.g. `"(max-width: 300px) 300px, (max-width: 710px) 710px, 850px"`) |
+| `imageSizes` | int[] | Image widths (px) to generate in srcset. Defaults to `[1700, 1420, 850, 710, 600, 300]`, which covers the 850px content column at 1x and 2x |
+| `imageSizeString` | string | The HTML `sizes` attribute for responsive images: the image's displayed width as a CSS length (`px`, `vw`, or `calc()`, never `w`). Defaults to `"(max-width: 882px) calc(100vw - 2rem), 850px"`, which matches the theme's content column |
 | `OpenGraph` | bool | Emit Open Graph meta tags |
 | `TwitterCards` | bool | Emit Twitter Card meta tags |
 | `jsonld` | bool | Emit JSON-LD meta tags (off by default) |
