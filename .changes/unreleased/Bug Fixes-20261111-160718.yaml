@@ -1,0 +1,3 @@
+kind: Bug Fixes
+body: Remove the mobile rule that tried to stack the search form into one column; the archive form styles always overrode it, so it never applied.
+time: 2026-11-11T16:07:18.000000-06:00

@@ -2,7 +2,6 @@
 
 .home .hero {
   padding: 2rem 0 0;
-  text-align: left;
 
   .container {
     font-size: 1.3rem;
@@ -14,13 +13,12 @@
     justify-content: space-between;
 
     h1 {
-      color: $text-bright;
       font-size: 3rem;
       margin-bottom: 1.5rem;
     }
 
     img {
-      height: auto;
+      flex-shrink: 0;
       margin-left: 2rem;
       width: 225px;
     }

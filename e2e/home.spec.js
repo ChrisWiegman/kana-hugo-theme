@@ -43,6 +43,23 @@ test('homepage hero image renders via asset-image shortcode', async ({
 	await expect(heroImg).toHaveJSProperty('naturalWidth', 450);
 });
 
+test('homepage hero image keeps its width before it loads', async ({ page }) => {
+	// Hold the hero image so it stays unloaded. Without an intrinsic size, a
+	// flex item can shrink next to long text and then jump back to 225px when
+	// the image arrives, shifting everything below the hero.
+	await page.setViewportSize({ width: 1280, height: 900 });
+	await page.route('**/images/**', () => {});
+	await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+	await page.locator('article.hero .intro p').first().evaluate((p) => {
+		p.textContent = p.textContent.repeat(20);
+	});
+
+	const box = await page.locator('article.hero .content img').boundingBox();
+
+	expect(box.width).toBe(225);
+});
+
 test('header icon is rendered at 2x its displayed size', async ({ page }) => {
 	await page.goto('/');
 

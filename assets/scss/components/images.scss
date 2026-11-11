@@ -5,20 +5,3 @@ img {
   vertical-align: bottom;
   border-radius: 12px;
 }
-
-figure {
-  display: table;
-  margin: 0 auto;
-
-  img.with-caption {
-    margin-bottom: 0;
-  }
-
-  figcaption {
-    display: table-caption;
-    caption-side: bottom;
-    margin: 0.5em 1em 2em;
-    font-size: 0.8rem;
-    text-align: center;
-  }
-}

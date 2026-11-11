@@ -24,38 +24,27 @@
   border: 2px solid #282828;
 }
 
-.bg,
 .chroma {
   color: #ebdbb2;
   background-color: #282828;
-}
 
-.chroma {
-  .lnlinks { outline: none; text-decoration: none; color: inherit; }
+  // Only token classes that appear in this site's code blocks are styled.
+  // Other tokens fall back to the base text color.
   .lntd { vertical-align: top; padding: 0; margin: 0; border: 0; }
   .lntable { border-spacing: 0; padding: 0; margin: 0; border: 0; }
   .hl { background-color: #3d3d3d; }
-  .lnt,
-  .ln { white-space: pre; -webkit-user-select: none; user-select: none; margin-right: 0.4em; padding: 0 0.4em; color: #756d59; }
+  .lnt { white-space: pre; -webkit-user-select: none; user-select: none; margin-right: 0.4em; padding: 0 0.4em; color: #756d59; }
   .line { display: flex; }
 
-  .k, .kc, .kd, .kn, .kp, .kr, .o, .ow { color: #fe8019; }
-  .kt, .ni, .nb, .bp, .nf, .fm { color: #fabd2f; }
-  .na, .s, .sa, .sb, .sc, .dl, .sd, .s2, .se, .sh, .si, .sx, .sr, .s1 { color: #b8bb26; }
+  .k, .kc, .kd, .kn, .kr, .o { color: #fe8019; }
+  .kt, .nb, .nf { color: #fabd2f; }
+  .na, .s, .sb, .sd, .s2, .se, .si, .sx, .sr, .s1 { color: #b8bb26; }
   .na { font-weight: bold; }
-  .no, .m, .mb, .mf, .mh, .mi, .il, .mo { color: #d3869b; }
-  .ne, .nl, .nt { color: #fb4934; }
-  .ss { color: #83a598; }
-  .c, .ch, .cm, .c1, .cs { color: #928374; font-style: italic; }
+  .no, .m, .mi, .mo { color: #d3869b; }
+  .nt { color: #fb4934; }
+  .c, .ch, .cm, .c1 { color: #928374; font-style: italic; }
   .cp { color: #8ec07c; }
-  .cpf { color: #8ec07c; font-style: italic; }
 
-  .gd { color: #282828; background-color: #fb4934; }
   .ge { color: #83a598; text-decoration: underline; }
-  .gr,
-  .gt { background-color: #fb4934; font-weight: bold; }
-  .gh,
   .gu { color: #b8bb26; font-weight: bold; }
-  .gi { color: #282828; background-color: #b8bb26; }
-  .go { color: #504945; }
 }

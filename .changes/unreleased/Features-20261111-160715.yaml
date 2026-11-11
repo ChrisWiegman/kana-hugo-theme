@@ -1,0 +1,3 @@
+kind: Features
+body: Shrink the stylesheet every page loads by moving rules the homepage never uses (figures, post lists, pagination, and post-only mobile styles) into the page stylesheet and removing redundant and unreachable rules. The homepage CSS is about 30% smaller (20% gzipped).
+time: 2026-11-11T16:07:15.000000-06:00

@@ -36,3 +36,69 @@ article.note {
     float: right;
   }
 }
+
+// Shared by archive and single pages; moved out of main.scss to keep the homepage CSS small.
+ul.posts,
+ul.notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: block;
+  }
+}
+
+.prevnext {
+  margin: 0 auto;
+  max-width: 850px;
+  padding: 1rem;
+}
+
+figure {
+  display: table;
+  margin: 0 auto;
+
+  img.with-caption {
+    margin-bottom: 0;
+  }
+
+  figcaption {
+    display: table-caption;
+    caption-side: bottom;
+    margin: 0.5em 1em 2em;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+}
+
+@media screen and (max-width: 710px) {
+  .page main {
+    article h1 {
+      font-size: 1.8rem;
+    }
+
+    article .content {
+      p,
+      ol,
+      ul,
+      table,
+      blockquote {
+        font-size: 1.2rem;
+        margin: 0 0 1.5rem;
+      }
+    }
+
+    article .content-header {
+      padding: 0 0 2rem;
+
+      .meta {
+        padding: 0.4rem 0;
+      }
+    }
+
+    .description {
+      font-size: 1rem;
+    }
+  }
+}

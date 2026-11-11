@@ -31,16 +31,6 @@ main a {
   text-decoration: none;
 }
 
-a.post.post--draft {
-  border: 1px dashed $primary;
-  border-radius: 8px;
-  background: rgba(200, 128, 74, 0.08);
-
-  .post-title {
-    color: $primary;
-  }
-}
-
 a.post {
   gap: 1rem;
   align-items: center;
@@ -74,17 +64,6 @@ a.post {
     font-size: 0.8rem;
     font-weight: 400;
     text-align: center;
-  }
-}
-
-ul.posts,
-ul.notes {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-
-  li {
-    display: block;
   }
 }
 
@@ -159,8 +138,7 @@ header {
   }
 }
 
-.container,
-.prevnext {
+.container {
   margin: 0 auto;
   max-width: 850px;
   padding: 1rem;
@@ -170,8 +148,7 @@ main {
   margin-top: 60px;
   min-height: calc(100vh - 145px);
 
-  article,
-  .prevnext {
+  article {
     a {
       border-bottom: 1px solid $link;
       color: $link;

@@ -1,0 +1,12 @@
+@use "components/variables" as *;
+
+// Only loaded on the homepage in development, where drafts are listed.
+a.post.post--draft {
+  border: 1px dashed $primary;
+  border-radius: 8px;
+  background: rgba(200, 128, 74, 0.08);
+
+  .post-title {
+    color: $primary;
+  }
+}

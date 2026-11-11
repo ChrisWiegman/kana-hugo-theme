@@ -40,6 +40,10 @@
 {{ $options := (dict "targetPath" "css/main.css" "outputStyle" "compressed" "transpiler" "dartsass") }}
 {{ $style := resources.Get "scss/main.scss" | css.Sass $options | minify | fingerprint }}
 <link rel="stylesheet" href="{{ $style.Permalink }}" integrity="{{ $style.Data.Integrity }}" />
+{{- if and hugo.IsDevelopment .IsHome }}
+{{- $draftStyle := resources.Get "scss/drafts.scss" | css.Sass $options | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $draftStyle.Permalink }}" integrity="{{ $draftStyle.Data.Integrity }}" />
+{{- end }}
 {{- $codePattern := "(?m)(^|\\n)(```|~~~)|\\{\\{[%<]\\s*highlight" -}}
 {{- $needsChroma := newScratch -}}
 {{- $needsChroma.Set "value" false -}}

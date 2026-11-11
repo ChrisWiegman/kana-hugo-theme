@@ -1,0 +1,3 @@
+kind: Bug Fixes
+body: Keep the homepage hero image at its full width while it loads, so the intro text and recent posts no longer shift when it appears.
+time: 2026-11-11T16:07:14.000000-06:00
