@@ -80,6 +80,11 @@
 {{- $libraryStyle := resources.Get "scss/library.scss" | css.Sass $options | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $libraryStyle.Permalink }}" integrity="{{ $libraryStyle.Data.Integrity }}" />
 {{- end -}}
+{{- /* Optional site stylesheet: a site that adds assets/scss/site.scss gets it on every page, so it can style its own content without inline styles. */ -}}
+{{- with resources.Get "scss/site.scss" -}}
+{{- $siteStyle := . | css.Sass $options | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $siteStyle.Permalink }}" integrity="{{ $siteStyle.Data.Integrity }}" />
+{{- end -}}
 <link rel="icon" type="image/x-icon" href="{{ "/favicon.ico" | absURL }}" />
 {{- if isset .Site.Params "mobilewebapptitle" -}}
 <meta name="apple-mobile-web-app-title" content="{{ .Site.Params.MobileWebAppTitle }}" />
