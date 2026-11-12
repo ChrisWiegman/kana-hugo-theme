@@ -63,11 +63,11 @@ mainSections = ["posts"]
 description  = "Your site description"
 
 [outputs]
-home = ["HTML", "RSS", "JSON", "markdown", "llms", "llmsfull", "agentskills", "ard", "apicatalog", "poppy"]
+home = ["HTML", "RSS", "JSON", "markdown", "llms", "llmsfull", "agentskills", "ard", "apicatalog", "poppy", "mcpcard"]
 page = ["HTML", "markdown"]
 ```
 
-The `JSON` output on `home` is required for client-side search to work. The `llms`, `llmsfull`, `agentskills`, `ard`, `apicatalog`, `poppy`, and `markdown` outputs are optional; see [AI and Agent Discovery](#ai-and-agent-discovery). The theme defines these output formats, but Hugo doesn't merge `[outputs]` from themes, so a site that sets its own `[outputs]` must list them itself.
+The `JSON` output on `home` is required for client-side search to work. The `llms`, `llmsfull`, `agentskills`, `ard`, `apicatalog`, `poppy`, `mcpcard`, and `markdown` outputs are optional; see [AI and Agent Discovery](#ai-and-agent-discovery). The theme defines these output formats, but Hugo doesn't merge `[outputs]` from themes, so a site that sets its own `[outputs]` must list them itself.
 
 ### Theme Parameters
 
@@ -287,7 +287,7 @@ Only set `markdownNegotiation` if your host actually serves `index.md` for `Acce
 
 ### Agentic Resource Discovery manifest
 
-Add `"ard"` to `outputs.home` to publish an [ARD](https://agenticresourcediscovery.org) manifest at `/.well-known/ard.json`, plus an identical copy at the predecessor path `/.well-known/ai-catalog.json` that older consumers and scanners look for. It lists the machine-readable resources the site publishes: the agent skill, llms.txt, the JSON search index, the RSS feed, and the OpenAPI description, each only when its output is enabled. Each entry gets a `urn:air:<domain>:<namespace>:<name>` identifier and a few sample queries. `robots.txt` gets an `Agentmap:` line, and the home page gets `<link rel="ard">` and `<link rel="ai-catalog">`.
+Add `"ard"` to `outputs.home` to publish an [ARD](https://agenticresourcediscovery.org) manifest at `/.well-known/ard.json`, plus an identical copy at the predecessor path `/.well-known/ai-catalog.json` that older consumers and scanners look for. It lists the machine-readable resources the site publishes: the agent skill, llms.txt, the JSON search index, the RSS feed, the OpenAPI description, and the MCP server, each only when its output is enabled. Each entry gets a `urn:air:<domain>:<namespace>:<name>` identifier and a few sample queries. `robots.txt` gets an `Agentmap:` line, and the home page gets `<link rel="ard">` and `<link rel="ai-catalog">`.
 
 List any other resources (an MCP server card, say) in `params.ard.entries`; each is added to the manifest as written:
 
@@ -307,6 +307,37 @@ Serve both files with `Access-Control-Allow-Origin: *` (see [Headers for discove
 Add `"apicatalog"` to `outputs.home` to publish an [RFC 9727](https://www.rfc-editor.org/rfc/rfc9727) API catalog at `/.well-known/api-catalog` and the OpenAPI 3.1 description it links to at `/openapi.json`. The "API" is the site's static files: the search index, Markdown pages, llms.txt, the feeds, and the sitemap, all read-only with no authentication. The catalog's `service-doc` link points to the agent skill, or to llms.txt if the skill is off. The home page gets `<link rel="api-catalog">`.
 
 The catalog file has no extension, so your host must serve it as `application/linkset+json`.
+
+### MCP server (Cloudflare Workers)
+
+`workers/mcp.mjs` is a small, read-only [MCP](https://modelcontextprotocol.io) server for sites hosted on Cloudflare Workers. It speaks Streamable HTTP at `/mcp` (stateless, JSON responses, no sign-in) and offers three tools, all answered from files Hugo already publishes:
+
+- **`search_site`**: searches the JSON search index.
+- **`list_recent_posts`**: the newest posts from the search index.
+- **`get_page`**: any page on the site as Markdown (needs the `markdown` page output).
+
+Point your Worker at it and send only `/mcp` requests to it, so every other request is still served as a static file without running the Worker:
+
+```jsonc
+// wrangler.jsonc
+{
+  "main": "themes/kana-hugo-theme/workers/mcp.mjs",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/mcp", "/mcp/*"]
+  }
+}
+```
+
+Then add `"mcpcard"` to `outputs.home` to publish its [MCP Server Card](https://github.com/modelcontextprotocol/experimental-ext-server-card) at `/.well-known/mcp/server-card.json`. The Worker also serves the card at `/mcp/server-card` and takes its name, title, and version from it. The ARD manifest and the agent skill list the server once the card is enabled. Only enable `mcpcard` with the Worker deployed.
+
+```toml
+[params.mcp]
+name        = "com.example/site"   # reverse-DNS server name (default: from the site's domain)
+version     = "1.0.0"              # default 1.0.0
+description = "..."                # default: generated from the site title
+```
 
 ### Personal Agent Protocol
 
@@ -346,6 +377,10 @@ Static hosts serve files by extension, so set these headers yourself. For Cloudf
 
 /openapi.json
   Content-Type: application/vnd.oai.openapi+json
+  Access-Control-Allow-Origin: *
+
+/.well-known/mcp/server-card.json
+  Content-Type: application/mcp-server-card+json
   Access-Control-Allow-Origin: *
 ```
 
@@ -496,6 +531,7 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 │   ├── home.agentskills.json # Agent Skills discovery index
 │   ├── home.apicatalog     # RFC 9727 API catalog (and /openapi.json)
 │   ├── home.ard.json       # ARD manifest (and ai-catalog.json)
+│   ├── home.mcpcard.json   # MCP Server Card
 │   ├── home.poppy.json     # Personal Agent Protocol declaration
 │   ├── home.llms.txt       # llms.txt
 │   ├── home.markdown.md    # Markdown version of the homepage
@@ -508,8 +544,10 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 │   ├── sitemap.xml
 │   ├── term.html
 │   └── 404.html
-└── scripts/
-    └── screenshots.mjs     # screenshot generation script
+├── scripts/
+│   └── screenshots.mjs     # screenshot generation script
+└── workers/
+    └── mcp.mjs             # read-only MCP server for Cloudflare Workers
 ```
 
 ## Formatting

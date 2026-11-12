@@ -185,7 +185,7 @@ test('ARD manifest lists the site resources at both well-known paths', async ({ 
 
 	const types = manifest.entries.map((e) => e.type);
 
-	expect(types).toEqual(['application/agent-skills+md', 'text/markdown', 'application/json', 'application/rss+xml', 'application/vnd.oai.openapi+json']);
+	expect(types).toEqual(['application/agent-skills+md', 'text/markdown', 'application/json', 'application/rss+xml', 'application/vnd.oai.openapi+json', 'application/mcp-server-card+json']);
 
 	for (const entry of manifest.entries) {
 		expect(entry.identifier.startsWith(`urn:air:${host}:`)).toBe(true);

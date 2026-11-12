@@ -113,6 +113,19 @@ export default [
 		},
 		rules: sharedRules,
 	},
+	// Cloudflare Workers (ES modules)
+	{
+		files: ['workers/*.mjs'],
+		plugins: { '@stylistic': stylistic },
+		languageOptions: {
+			ecmaVersion: 2022,
+			sourceType: 'module',
+			globals: {
+				...globals.serviceworker,
+			},
+		},
+		rules: sharedRules,
+	},
 	// Playwright config and E2E tests (Node.js)
 	{
 		files: [

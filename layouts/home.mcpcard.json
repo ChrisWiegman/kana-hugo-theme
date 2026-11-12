@@ -1,0 +1,29 @@
+{{- /*
+  MCP Server Card (SEP-2127, https://github.com/modelcontextprotocol/experimental-ext-server-card)
+  at /.well-known/mcp/server-card.json for the read-only MCP server in
+  workers/mcp.mjs, which must be deployed at /mcp. The Worker reads its name,
+  title, and version from this file and also serves it at /mcp/server-card.
+  serverInfo, transport, and capabilities repeat the same facts in the shape
+  older consumers and scanners look for.
+*/ -}}
+{{- $cfg := site.Params.mcp | default dict -}}
+{{- $host := (urls.Parse site.BaseURL).Hostname | strings.TrimPrefix "www." -}}
+{{- $reversed := slice -}}
+{{- range $part := split $host "." }}{{ $reversed = slice $part | append $reversed }}{{ end -}}
+{{- $name := $cfg.name | default (printf "%s/site" (delimit $reversed ".")) -}}
+{{- $version := $cfg.version | default "1.0.0" -}}
+{{- $endpoint := "mcp" | absURL -}}
+{{- $versions := slice "2025-11-25" "2025-06-18" "2025-03-26" -}}
+{{- $card := dict
+  "$schema" "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json"
+  "name" $name
+  "title" site.Title
+  "version" $version
+  "description" ($cfg.description | default (printf "Search and read %s: find posts and pages, list recent posts, and get any page as Markdown. Read-only, no sign-in." site.Title))
+  "websiteUrl" ("/" | absURL)
+  "remotes" (slice (dict "type" "streamable-http" "url" $endpoint "supportedProtocolVersions" $versions))
+  "serverInfo" (dict "name" $name "title" site.Title "version" $version)
+  "transport" (dict "type" "streamable-http" "endpoint" $endpoint)
+  "capabilities" (dict "tools" (dict "listChanged" false))
+-}}
+{{- $card | jsonify (dict "indent" "  ") -}}

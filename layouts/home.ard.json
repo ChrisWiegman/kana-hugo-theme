@@ -86,6 +86,22 @@
 ) -}}
 {{- end -}}
 
+{{- with $home.OutputFormats.Get "mcpcard" -}}
+{{- $entries = $entries | append (dict
+  "identifier" (printf "urn:air:%s:mcp:site" $host)
+  "displayName" (printf "%s MCP server" $title)
+  "type" "application/mcp-server-card+json"
+  "url" .Permalink
+  "capabilities" (slice "search_site" "list_recent_posts" "get_page")
+  "description" (printf "A read-only MCP server at %s that searches %s, lists recent posts, and returns pages as Markdown." ("mcp" | absURL) $title)
+  "representativeQueries" (slice
+    (printf "search %s for posts about a topic" $title)
+    (printf "what are the latest posts on %s" $title)
+    (printf "read a %s post in full" $title)
+  )
+) -}}
+{{- end -}}
+
 {{- range $cfg.entries }}{{ $entries = $entries | append . }}{{ end -}}
 
 {{- $hostInfo := dict "displayName" $title "identifier" $host -}}

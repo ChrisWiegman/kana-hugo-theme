@@ -18,6 +18,7 @@
   "contents" (dict "type" "string" "description" "The first 500 characters of the page's plain text.")
   "tags" $strs
   "categories" $strs
+  "kind" (dict "type" "string" "enum" (slice "post" "page") "description" "Whether this is a dated post or a standalone page.")
 ) -}}
 {{- $get = dict "operationId" "getSearchIndex" "summary" "Search index" "description" "Every post and page with its title, URL, date, tags, categories, and the start of its text. Download it and filter locally to search the site." "responses" (dict "200" (dict "description" "The search index." "content" (dict "application/json" (dict "schema" (dict "type" "array" "items" $page))))) -}}
 {{- $paths = merge $paths (dict (.Permalink | strings.TrimPrefix $base) (dict "get" $get)) -}}

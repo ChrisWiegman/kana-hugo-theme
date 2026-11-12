@@ -10,7 +10,7 @@
 
 # Output formats used for AI and agent discovery. Sites that define their own
 # [outputs] must add "llms"/"llmsfull"/"agentskills"/"ard"/"apicatalog"/"poppy"
-# to home and "markdown" to page to use them.
+# /"mcpcard" to home and "markdown" to page to use them.
 [mediaTypes."application/linkset+json"]
   suffixes = []
 
@@ -62,6 +62,16 @@
   notAlternative = true
   permalinkable = true
 
+# MCP Server Card for the Worker in workers/mcp.mjs; only enable it with the
+# Worker deployed at /mcp.
+[outputFormats.mcpcard]
+  mediaType = "application/json"
+  baseName = "server-card"
+  path = ".well-known/mcp"
+  isPlainText = true
+  notAlternative = true
+  permalinkable = true
+
 [outputs]
-  home = ["html", "rss", "json", "llms", "llmsfull", "agentskills", "ard", "apicatalog", "poppy"]
+  home = ["html", "rss", "json", "llms", "llmsfull", "agentskills", "ard", "apicatalog", "poppy", "mcpcard"]
   page = ["html", "markdown"]

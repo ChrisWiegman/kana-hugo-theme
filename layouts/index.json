@@ -4,6 +4,6 @@
 {{- $searchPosts := where site.RegularPages "Section" "in" $sections -}}
 {{- $index := slice -}}
 {{- range (union $searchPages $searchPosts) -}}
-    {{- $index = $index | append (dict "title" .Title "tags" .Params.tags "categories" .Params.categories "contents" (.Plain | truncate 500) "permalink" .RelPermalink "date" .Date) -}}
+    {{- $index = $index | append (dict "title" .Title "tags" .Params.tags "categories" .Params.categories "contents" (.Plain | truncate 500) "permalink" .RelPermalink "date" .Date "kind" (cond (eq .Type "page") "page" "post")) -}}
 {{- end -}}
 {{- $index | jsonify -}}

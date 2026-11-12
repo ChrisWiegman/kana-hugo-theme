@@ -20,6 +20,10 @@ description: {{ .description }}
 {{ end -}}
 {{ site.Title }} ({{ site.BaseURL }}) is a static website{{ with site.Params.author }} written by {{ . }}{{ end }}. It has no server-side API, forms, or logins: everything below is a plain file you can fetch with a GET request, with no authentication.
 
+{{ with $home.OutputFormats.Get "mcpcard" -}}
+If you can use MCP, connect to the read-only MCP server at {{ "mcp" | absURL }} (Streamable HTTP, no sign-in). Its `search_site`, `list_recent_posts`, and `get_page` tools do everything below for you.
+
+{{ end -}}
 ## Read a page
 
 {{ if $cfg.markdownNegotiation -}}
@@ -42,7 +46,7 @@ Each Markdown file starts with front matter giving the title, canonical `url`, d
 - **All posts:** [the archive]({{ with .OutputFormats.Get "markdown" }}{{ .Permalink }}{{ else }}{{ .Permalink }}{{ end }}) lists every post by year, newest first.
 {{ end -}}
 {{ with $home.OutputFormats.Get "json" -}}
-- **Search:** [{{ .Permalink | strings.TrimPrefix $base }}]({{ .Permalink }}) is the site's search index, a JSON array of pages and posts. Each entry has `title`, `tags`, `categories`, `contents` (the first 500 characters of plain text), `permalink` (relative to {{ $base }}), and `date`. Fetch it once and filter it yourself; there is no search endpoint.
+- **Search:** [{{ .Permalink | strings.TrimPrefix $base }}]({{ .Permalink }}) is the site's search index, a JSON array of pages and posts. Each entry has `title`, `tags`, `categories`, `contents` (the first 500 characters of plain text), `permalink` (relative to {{ $base }}), `date`, and `kind` (`post` or `page`). Fetch it once and filter it yourself; there is no HTTP search endpoint.
 {{ end -}}
 {{ with $home.OutputFormats.Get "rss" -}}
 - **Latest posts:** [the RSS feed]({{ .Permalink }}) has recent posts with full content.

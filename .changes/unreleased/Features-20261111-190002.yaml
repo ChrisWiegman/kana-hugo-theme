@@ -1,0 +1,3 @@
+kind: Features
+body: Add a read-only MCP server for Cloudflare Workers (workers/mcp.mjs) with search_site, list_recent_posts, and get_page tools answered from the site's static files, and an "mcpcard" output that publishes its MCP Server Card at /.well-known/mcp/server-card.json and lists it in the ARD manifest and agent skill. Search index entries now include kind ("post" or "page").
+time: 2026-11-11T19:00:02.000000-06:00

@@ -42,7 +42,7 @@ jobs:
               run: |
                 mkdir kana-hugo-theme
                 cp theme.toml LICENSE.txt README.md kana-hugo-theme/
-                cp -r archetypes assets layouts kana-hugo-theme/ 2>/dev/null || true
+                cp -r archetypes assets layouts workers kana-hugo-theme/ 2>/dev/null || true
                 zip -r kana-hugo-theme.zip kana-hugo-theme
 
             - name: Create GitHub Release

@@ -45,7 +45,7 @@ release: clean
 	@echo "Building release file: kana-hugo-theme.$(call ARGS,defaultstring).zip"
 	rm -rf build && mkdir -p build/kana-hugo-theme
 	cp theme.toml LICENSE.txt README.md build/kana-hugo-theme/
-	cp -r archetypes assets layouts build/kana-hugo-theme/
+	cp -r archetypes assets layouts workers build/kana-hugo-theme/
 	cd build && zip --recurse-paths ../kana-hugo-theme.$(call ARGS,defaultstring).zip kana-hugo-theme
 	rm -rf build
 	if [ ! -f ./kana-hugo-theme.$(call ARGS,defaultstring).zip  ]; then \
