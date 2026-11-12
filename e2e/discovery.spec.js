@@ -1,4 +1,3 @@
-/* global window, document */
 const { createHash } = require('node:crypto');
 const { test, expect } = require('@playwright/test');
 
@@ -243,37 +242,6 @@ test('robots.txt and the home page head point to the discovery manifests', async
 	await expect(page.locator('head link[rel="ard"]')).toHaveCount(0);
 });
 
-test('WebMCP tools search the site and read pages as Markdown', async ({ page }) => {
-	await page.addInitScript(() => {
-		window.registeredTools = {};
-		document.modelContext = {
-			registerTool(tool) {
-				window.registeredTools[tool.name] = tool;
-
-				return Promise.resolve();
-			},
-		};
-	});
-
-	await page.goto('/');
-	await page.waitForFunction(() => Object.keys(window.registeredTools).length === 2);
-
-	const search = await page.evaluate(() => window.registeredTools.search_site.execute({ query: 'Hugo Development Post', limit: 2 }));
-
-	expect(search.results.length).toBeGreaterThan(0);
-	expect(search.results.length).toBeLessThanOrEqual(2);
-	expect(search.results[0].title).toMatch(/Hugo Development Post/);
-	expect(search.results[0].markdownUrl).toMatch(/\/index\.md$/);
-
-	const markdown = await page.evaluate((url) => window.registeredTools.get_page_markdown.execute({ url }), search.results[0].url);
-
-	expect(markdown).toMatch(/^---\ntitle: "Hugo Development Post/);
-
-	const offsite = await page.evaluate(() => window.registeredTools.get_page_markdown.execute({ url: 'https://example.com/' }).then(() => 'resolved', (e) => e.message));
-
-	expect(offsite).toMatch(/Only pages on/);
-});
-
 test('the search form is exposed as a declarative WebMCP tool', async ({ page }) => {
 	await page.goto('/blog/');
 
@@ -282,4 +250,15 @@ test('the search form is exposed as a declarative WebMCP tool', async ({ page })
 	await expect(form).toHaveAttribute('toolname', 'open_search_results');
 	await expect(form).toHaveAttribute('tooldescription', /Hugo Theme Development Site/);
 	await expect(form.locator('input[name="s"]')).toHaveAttribute('toolparamdescription', /.+/);
+});
+
+test('pages load no JavaScript beyond search and the library', async ({ page }) => {
+	for (const path of ['/', '/2026/01/hugo-development-post/', '/blog/']) {
+		await page.goto(path);
+
+		const scripts = await page.locator('script[src]').evaluateAll((nodes) => nodes.map((n) => n.getAttribute('src')));
+
+		// livereload.js is injected by the Hugo dev server, not the theme.
+		expect(scripts.filter((src) => !/\/scripts\/(search|library)\.|^\/livereload\.js/.test(src))).toEqual([]);
+	}
 });

@@ -252,7 +252,7 @@ The search index is built from the JSON output on the homepage and runs entirely
 
 ## AI and Agent Discovery
 
-All of these are off unless enabled, so existing sites don't change until you opt in. The exception is WebMCP, which is on whenever the search index is, and does nothing in browsers without WebMCP.
+All of these are off unless enabled, so existing sites don't change until you opt in. The exception is the WebMCP form markup, which is plain HTML attributes on the search form.
 
 ### llms.txt and llms-full.txt
 
@@ -348,14 +348,9 @@ Add `"poppy"` to `outputs.home` to publish a [Personal Agent Protocol](https://p
 organization = "Example Co"   # default: the site title
 ```
 
-### WebMCP tools
+### WebMCP search form
 
-When the JSON search index is enabled, every page loads a small script that registers [WebMCP](https://webmachinelearning.github.io/webmcp/) tools with `document.modelContext` (or `navigator.modelContext`), so an agent in the browser can use the site directly:
-
-- **`search_site`**: searches titles, text, tags, and categories in the search index and returns the best matches with their URLs.
-- **`get_page_markdown`**: returns a page on the site as Markdown (only with the `markdown` page output). It refuses URLs on other origins.
-
-The search form also carries the declarative WebMCP attributes (`toolname`, `tooldescription`, `toolparamdescription`). In browsers without WebMCP the script does nothing. Set `params.webmcp = false` to leave it all out.
+The search form carries the declarative [WebMCP](https://github.com/webmachinelearning/webmcp/blob/main/declarative-api-explainer.md) attributes (`toolname`, `tooldescription`, `toolparamdescription`), so an agent in a WebMCP-capable browser can use it as an `open_search_results` tool. They're plain HTML: no JavaScript is loaded for them. Set `params.webmcp = false` to leave them out.
 
 ### Headers for discovery files
 
@@ -510,8 +505,7 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 │   │   └── SKILL.md        # agent skill template for the Agent Skills index
 │   ├── scripts/
 │   │   ├── library.js      # book list loading, filtering, and sorting
-│   │   ├── search.js       # client-side search
-│   │   └── webmcp.js       # WebMCP tools for agents in the browser
+│   │   └── search.js       # client-side search
 │   └── scss/               # component-based stylesheets
 ├── dev/                    # local development site
 │   ├── content/

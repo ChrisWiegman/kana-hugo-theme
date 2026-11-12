@@ -1,0 +1,3 @@
+kind: Bug Fixes
+body: Stop loading the WebMCP script on every page. It added a JavaScript request for every visitor while doing nothing in browsers without WebMCP. The search form keeps its declarative WebMCP attributes, which need no JavaScript, and the MCP server (workers/mcp.mjs) offers the same tools to agents.
+time: 2026-11-11T20:00:00.000000-06:00
