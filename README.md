@@ -63,11 +63,11 @@ mainSections = ["posts"]
 description  = "Your site description"
 
 [outputs]
-home = ["HTML", "RSS", "JSON", "markdown", "llms", "llmsfull", "agentskills"]
+home = ["HTML", "RSS", "JSON", "markdown", "llms", "llmsfull", "agentskills", "ard", "apicatalog", "poppy"]
 page = ["HTML", "markdown"]
 ```
 
-The `JSON` output on `home` is required for client-side search to work. The `llms`, `llmsfull`, `agentskills`, and `markdown` outputs are optional; see [AI and Agent Discovery](#ai-and-agent-discovery). The theme defines these output formats, but Hugo doesn't merge `[outputs]` from themes, so a site that sets its own `[outputs]` must list them itself.
+The `JSON` output on `home` is required for client-side search to work. The `llms`, `llmsfull`, `agentskills`, `ard`, `apicatalog`, `poppy`, and `markdown` outputs are optional; see [AI and Agent Discovery](#ai-and-agent-discovery). The theme defines these output formats, but Hugo doesn't merge `[outputs]` from themes, so a site that sets its own `[outputs]` must list them itself.
 
 ### Theme Parameters
 
@@ -252,7 +252,7 @@ The search index is built from the JSON output on the homepage and runs entirely
 
 ## AI and Agent Discovery
 
-All of these are off unless enabled, so existing sites don't change until you opt in.
+All of these are off unless enabled, so existing sites don't change until you opt in. The exception is WebMCP, which is on whenever the search index is, and does nothing in browsers without WebMCP.
 
 ### llms.txt and llms-full.txt
 
@@ -284,6 +284,70 @@ markdownNegotiation = true        # tell agents they can request Markdown with A
 ```
 
 Only set `markdownNegotiation` if your host actually serves `index.md` for `Accept: text/markdown` requests (for example with a Cloudflare URL rewrite rule); the theme can't do that from static files alone.
+
+### Agentic Resource Discovery manifest
+
+Add `"ard"` to `outputs.home` to publish an [ARD](https://agenticresourcediscovery.org) manifest at `/.well-known/ard.json`, plus an identical copy at the predecessor path `/.well-known/ai-catalog.json` that older consumers and scanners look for. It lists the machine-readable resources the site publishes: the agent skill, llms.txt, the JSON search index, the RSS feed, and the OpenAPI description, each only when its output is enabled. Each entry gets a `urn:air:<domain>:<namespace>:<name>` identifier and a few sample queries. `robots.txt` gets an `Agentmap:` line, and the home page gets `<link rel="ard">` and `<link rel="ai-catalog">`.
+
+List any other resources (an MCP server card, say) in `params.ard.entries`; each is added to the manifest as written:
+
+```toml
+[[params.ard.entries]]
+identifier            = "urn:air:example.com:mcp:site"
+displayName           = "Example MCP server"
+type                  = "application/mcp-server-card+json"
+url                   = "https://example.com/.well-known/mcp/server-card.json"
+representativeQueries = ["search example.com", "read a post from example.com"]
+```
+
+Serve both files with `Access-Control-Allow-Origin: *` (see [Headers for discovery files](#headers-for-discovery-files)).
+
+### API catalog and OpenAPI description
+
+Add `"apicatalog"` to `outputs.home` to publish an [RFC 9727](https://www.rfc-editor.org/rfc/rfc9727) API catalog at `/.well-known/api-catalog` and the OpenAPI 3.1 description it links to at `/openapi.json`. The "API" is the site's static files: the search index, Markdown pages, llms.txt, the feeds, and the sitemap, all read-only with no authentication. The catalog's `service-doc` link points to the agent skill, or to llms.txt if the skill is off. The home page gets `<link rel="api-catalog">`.
+
+The catalog file has no extension, so your host must serve it as `application/linkset+json`.
+
+### Personal Agent Protocol
+
+Add `"poppy"` to `outputs.home` to publish a [Personal Agent Protocol](https://personalagentprotocol.org) declaration at `/.well-known/poppy.json`. It's website-only (`"web": {}`): it names the site and its domain and declares no agent, API sessions, or sign-in.
+
+```toml
+[params.poppy]
+organization = "Example Co"   # default: the site title
+```
+
+### WebMCP tools
+
+When the JSON search index is enabled, every page loads a small script that registers [WebMCP](https://webmachinelearning.github.io/webmcp/) tools with `document.modelContext` (or `navigator.modelContext`), so an agent in the browser can use the site directly:
+
+- **`search_site`**: searches titles, text, tags, and categories in the search index and returns the best matches with their URLs.
+- **`get_page_markdown`**: returns a page on the site as Markdown (only with the `markdown` page output). It refuses URLs on other origins.
+
+The search form also carries the declarative WebMCP attributes (`toolname`, `tooldescription`, `toolparamdescription`). In browsers without WebMCP the script does nothing. Set `params.webmcp = false` to leave it all out.
+
+### Headers for discovery files
+
+Static hosts serve files by extension, so set these headers yourself. For Cloudflare Workers or Pages, add to `static/_headers`:
+
+```
+/.well-known/api-catalog
+  Content-Type: application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"
+  Access-Control-Allow-Origin: *
+
+/.well-known/ard.json
+  Access-Control-Allow-Origin: *
+
+/.well-known/ai-catalog.json
+  Access-Control-Allow-Origin: *
+
+/.well-known/poppy.json
+  Access-Control-Allow-Origin: *
+
+/openapi.json
+  Content-Type: application/vnd.oai.openapi+json
+  Access-Control-Allow-Origin: *
+```
 
 ### robots.txt AI rules
 
@@ -411,7 +475,8 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 │   │   └── SKILL.md        # agent skill template for the Agent Skills index
 │   ├── scripts/
 │   │   ├── library.js      # book list loading, filtering, and sorting
-│   │   └── search.js       # client-side search
+│   │   ├── search.js       # client-side search
+│   │   └── webmcp.js       # WebMCP tools for agents in the browser
 │   └── scss/               # component-based stylesheets
 ├── dev/                    # local development site
 │   ├── content/
@@ -429,6 +494,9 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 │   ├── baseof.html
 │   ├── home.html
 │   ├── home.agentskills.json # Agent Skills discovery index
+│   ├── home.apicatalog     # RFC 9727 API catalog (and /openapi.json)
+│   ├── home.ard.json       # ARD manifest (and ai-catalog.json)
+│   ├── home.poppy.json     # Personal Agent Protocol declaration
 │   ├── home.llms.txt       # llms.txt
 │   ├── home.markdown.md    # Markdown version of the homepage
 │   ├── home.llmsfull.txt   # llms-full.txt

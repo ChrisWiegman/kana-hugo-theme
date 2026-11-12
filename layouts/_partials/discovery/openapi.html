@@ -1,0 +1,61 @@
+{{- /*
+  Returns an OpenAPI 3.1 description of the site's read-only, unauthenticated
+  endpoints: the static files the theme publishes. Only outputs the site has
+  enabled are listed. Published by home.apicatalog as /openapi.json.
+*/ -}}
+{{- $home := site.Home -}}
+{{- $base := strings.TrimSuffix "/" site.BaseURL -}}
+{{- $str := dict "type" "string" -}}
+{{- $strs := dict "type" "array" "items" $str -}}
+{{- $paths := dict -}}
+{{- $get := dict -}}
+
+{{- with $home.OutputFormats.Get "json" -}}
+{{- $page := dict "type" "object" "properties" (dict
+  "title" $str
+  "permalink" (dict "type" "string" "description" "Root-relative URL of the page.")
+  "date" (dict "type" "string" "format" "date-time")
+  "contents" (dict "type" "string" "description" "The first 500 characters of the page's plain text.")
+  "tags" $strs
+  "categories" $strs
+) -}}
+{{- $get = dict "operationId" "getSearchIndex" "summary" "Search index" "description" "Every post and page with its title, URL, date, tags, categories, and the start of its text. Download it and filter locally to search the site." "responses" (dict "200" (dict "description" "The search index." "content" (dict "application/json" (dict "schema" (dict "type" "array" "items" $page))))) -}}
+{{- $paths = merge $paths (dict (.Permalink | strings.TrimPrefix $base) (dict "get" $get)) -}}
+{{- end -}}
+
+{{- if $home.OutputFormats.Get "markdown" -}}
+{{- $get = dict "operationId" "getPageMarkdown" "summary" "Page as Markdown" "description" "The Markdown version of any page, with front matter giving its title, canonical URL, dates, and tags. Append index.md to the page's URL; /index.md is the home page." "parameters" (slice (dict "name" "pagePath" "in" "path" "required" true "description" "The page's path including its trailing slash, for example 2026/01/my-post/. May contain slashes." "schema" $str)) "responses" (dict "200" (dict "description" "The page in Markdown." "content" (dict "text/markdown" (dict "schema" $str))) "404" (dict "description" "No page at that path.")) -}}
+{{- $paths = merge $paths (dict "/{pagePath}index.md" (dict "get" $get)) -}}
+{{- end -}}
+
+{{- $files := slice
+  (dict "format" "llms" "id" "getLlmsTxt" "summary" "llms.txt" "description" "A Markdown index of the site: its description, pages, and recent posts." "type" "text/plain")
+  (dict "format" "llmsfull" "id" "getLlmsFullTxt" "summary" "llms-full.txt" "description" "The full Markdown of every post in one file. Large." "type" "text/plain")
+  (dict "format" "rss" "id" "getFeed" "summary" "RSS feed" "description" "The latest posts with full content." "type" "application/rss+xml")
+  (dict "format" "agentskills" "id" "getAgentSkills" "summary" "Agent Skills index" "description" "A skill that tells agents how to read, search, and cite this site." "type" "application/json")
+-}}
+{{- range $files -}}
+{{- $f := . -}}
+{{- with $home.OutputFormats.Get $f.format -}}
+{{- $schema := cond (eq $f.type "application/json") (dict "type" "object") $str -}}
+{{- $get = dict "operationId" $f.id "summary" $f.summary "description" $f.description "responses" (dict "200" (dict "description" $f.summary "content" (dict $f.type (dict "schema" $schema)))) -}}
+{{- $paths = merge $paths (dict (.Permalink | strings.TrimPrefix $base) (dict "get" $get)) -}}
+{{- end -}}
+{{- end -}}
+
+{{- $get = dict "operationId" "getSitemap" "summary" "Sitemap" "description" "Every page on the site." "responses" (dict "200" (dict "description" "The sitemap." "content" (dict "application/xml" (dict "schema" $str)))) -}}
+{{- $paths = merge $paths (dict "/sitemap.xml" (dict "get" $get)) -}}
+
+{{- $info := dict
+  "title" (printf "%s content API" site.Title)
+  "version" (site.Lastmod.Format "2006-01-02")
+  "description" (printf "Read-only access to the content of %s. Every endpoint is a static file: no authentication, no rate-limit headers, and no writes." site.Title)
+-}}
+{{- with site.Params.license }}{{ with .link }}{{ $info = merge $info (dict "license" (dict "name" ($.Site.Params.license.name | default "License") "url" .)) }}{{ end }}{{ end -}}
+{{- return (dict
+  "openapi" "3.1.0"
+  "info" $info
+  "servers" (slice (dict "url" $base))
+  "security" slice
+  "paths" $paths
+) -}}

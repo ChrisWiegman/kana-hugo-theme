@@ -1,0 +1,96 @@
+{{- /*
+  Agentic Resource Discovery manifest (https://agenticresourcediscovery.org)
+  at /.well-known/ard.json, also published at the predecessor path
+  /.well-known/ai-catalog.json. It lists the machine-readable resources the
+  site publishes (only the outputs that are enabled), plus any entries in
+  params.ard.entries, each with a urn:air identifier and sample queries.
+  Serve both files with Access-Control-Allow-Origin: *.
+*/ -}}
+{{- $cfg := site.Params.ard | default dict -}}
+{{- $home := site.Home -}}
+{{- $host := (urls.Parse site.BaseURL).Hostname -}}
+{{- $title := site.Title -}}
+{{- $entries := slice -}}
+
+{{- if $home.OutputFormats.Get "agentskills" -}}
+{{- $skill := partial "discovery/skill.html" . -}}
+{{- $entries = $entries | append (dict
+  "identifier" (printf "urn:air:%s:skill:%s" $host $skill.name)
+  "displayName" (printf "Read and cite %s" $title)
+  "type" "application/agent-skills+md"
+  "url" $skill.resource.Permalink
+  "description" $skill.description
+  "representativeQueries" (slice
+    (printf "how do I read and cite posts from %s" $title)
+    (printf "fetch a %s page as Markdown" $title)
+    (printf "what content-use rules does %s set for AI" $title)
+  )
+) -}}
+{{- end -}}
+
+{{- with $home.OutputFormats.Get "llms" -}}
+{{- $entries = $entries | append (dict
+  "identifier" (printf "urn:air:%s:content:llms-txt" $host)
+  "displayName" (printf "%s llms.txt" $title)
+  "type" "text/markdown"
+  "url" .Permalink
+  "description" (printf "A Markdown index of %s: its description, pages, and recent posts." $title)
+  "representativeQueries" (slice
+    (printf "what is %s about" $title)
+    (printf "list the pages and recent posts on %s" $title)
+    (printf "give me an overview of %s" $title)
+  )
+) -}}
+{{- end -}}
+
+{{- with $home.OutputFormats.Get "json" -}}
+{{- $entries = $entries | append (dict
+  "identifier" (printf "urn:air:%s:content:search-index" $host)
+  "displayName" (printf "%s search index" $title)
+  "type" "application/json"
+  "url" .Permalink
+  "description" (printf "Every post and page on %s with its title, URL, date, tags, and the start of its text." $title)
+  "representativeQueries" (slice
+    (printf "find posts on %s about a topic" $title)
+    (printf "search %s for a keyword" $title)
+    (printf "which %s posts use a given tag" $title)
+  )
+) -}}
+{{- end -}}
+
+{{- with $home.OutputFormats.Get "rss" -}}
+{{- $entries = $entries | append (dict
+  "identifier" (printf "urn:air:%s:content:feed" $host)
+  "displayName" (printf "%s RSS feed" $title)
+  "type" "application/rss+xml"
+  "url" .Permalink
+  "description" (printf "The latest posts on %s with full content." $title)
+  "representativeQueries" (slice
+    (printf "what has %s published recently" $title)
+    (printf "get the latest posts from %s" $title)
+  )
+) -}}
+{{- end -}}
+
+{{- with $home.OutputFormats.Get "apicatalog" -}}
+{{- $entries = $entries | append (dict
+  "identifier" (printf "urn:air:%s:api:content" $host)
+  "displayName" (printf "%s content API" $title)
+  "type" "application/vnd.oai.openapi+json"
+  "url" ("openapi.json" | absURL)
+  "description" (printf "An OpenAPI description of the read-only, unauthenticated endpoints %s publishes." $title)
+  "representativeQueries" (slice
+    (printf "how can I fetch %s content programmatically" $title)
+    (printf "which endpoints does %s offer" $title)
+  )
+) -}}
+{{- end -}}
+
+{{- range $cfg.entries }}{{ $entries = $entries | append . }}{{ end -}}
+
+{{- $hostInfo := dict "displayName" $title "identifier" $host -}}
+{{- with $home.OutputFormats.Get "llms" }}{{ $hostInfo = merge $hostInfo (dict "documentationUrl" .Permalink) }}{{ end -}}
+{{- $manifest := dict "specVersion" "1.0" "host" $hostInfo "entries" $entries | jsonify (dict "indent" "  ") -}}
+{{- $legacy := $manifest | resources.FromString ".well-known/ai-catalog.json" -}}
+{{- $_ := $legacy.Permalink -}}
+{{- $manifest -}}

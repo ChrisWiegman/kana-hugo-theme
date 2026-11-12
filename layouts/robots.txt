@@ -21,3 +21,6 @@ Disallow: /
 {{- end }}
 
 Sitemap: {{ "sitemap.xml" | absURL }}
+{{- with site.Home.OutputFormats.Get "ard" }}
+Agentmap: {{ .Permalink }}
+{{- end }}

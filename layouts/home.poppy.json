@@ -1,0 +1,12 @@
+{{- /*
+  Personal Agent Protocol discovery (https://personalagentprotocol.org) at
+  /.well-known/poppy.json. A website-only declaration: the site offers no
+  agent, API sessions, or logins, so there is no auth block.
+*/ -}}
+{{- $cfg := site.Params.poppy | default dict -}}
+{{- dict
+  "protocol_version" "0.1"
+  "organization" (dict "name" ($cfg.organization | default site.Title) "domain" ((urls.Parse site.BaseURL).Hostname | strings.TrimPrefix "www."))
+  "web" dict
+  | jsonify (dict "indent" "  ")
+-}}

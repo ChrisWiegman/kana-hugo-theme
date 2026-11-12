@@ -1,0 +1,12 @@
+{{- /*
+  WebMCP (https://webmachinelearning.github.io/webmcp/): registers browser
+  tools that let an agent search the site and read pages as Markdown. Needs
+  the JSON search index; the Markdown tool also needs the markdown output.
+  Set params.webmcp = false to leave it out.
+*/ -}}
+{{- if ne site.Params.webmcp false -}}
+{{- with site.Home.OutputFormats.Get "json" -}}
+{{- $js := resources.Get "scripts/webmcp.js" | resources.Minify | fingerprint -}}
+<script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" data-index="{{ .RelPermalink }}" data-site="{{ site.Title }}"{{ if site.Home.OutputFormats.Get "markdown" }} data-markdown{{ end }}></script>
+{{- end -}}
+{{- end -}}

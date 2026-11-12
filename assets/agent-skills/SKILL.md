@@ -18,7 +18,7 @@ description: {{ .description }}
 {{ with site.Params.description }}{{ . }}
 
 {{ end -}}
-{{ site.Title }} ({{ site.BaseURL }}) is a static website{{ with site.Params.author }} written by {{ . }}{{ end }}. It has no API, forms, or logins: everything below is a plain file you can fetch with a GET request.
+{{ site.Title }} ({{ site.BaseURL }}) is a static website{{ with site.Params.author }} written by {{ . }}{{ end }}. It has no server-side API, forms, or logins: everything below is a plain file you can fetch with a GET request, with no authentication.
 
 ## Read a page
 
@@ -46,6 +46,9 @@ Each Markdown file starts with front matter giving the title, canonical `url`, d
 {{ end -}}
 {{ with $home.OutputFormats.Get "rss" -}}
 - **Latest posts:** [the RSS feed]({{ .Permalink }}) has recent posts with full content.
+{{ end -}}
+{{ with $home.OutputFormats.Get "apicatalog" -}}
+- **Machine-readable map:** [openapi.json]({{ "openapi.json" | absURL }}) describes these files as an OpenAPI 3.1 API, and [{{ .Permalink | strings.TrimPrefix $base }}]({{ .Permalink }}) is its RFC 9727 API catalog.
 {{ end -}}
 - **Every URL:** [sitemap.xml]({{ "sitemap.xml" | absURL }}) lists every page with its last modified date.
 

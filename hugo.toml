@@ -9,8 +9,11 @@
   imageSizeString = "(max-width: 882px) calc(100vw - 2rem), 850px"
 
 # Output formats used for AI and agent discovery. Sites that define their own
-# [outputs] must add "llms"/"llmsfull"/"agentskills" to home and "markdown" to
-# page to use them.
+# [outputs] must add "llms"/"llmsfull"/"agentskills"/"ard"/"apicatalog"/"poppy"
+# to home and "markdown" to page to use them.
+[mediaTypes."application/linkset+json"]
+  suffixes = []
+
 [outputFormats.llms]
   mediaType = "text/plain"
   baseName = "llms"
@@ -33,6 +36,32 @@
   notAlternative = true
   permalinkable = true
 
+# Agentic Resource Discovery manifest; also publishes ai-catalog.json.
+[outputFormats.ard]
+  mediaType = "application/json"
+  baseName = "ard"
+  path = ".well-known"
+  isPlainText = true
+  notAlternative = true
+  permalinkable = true
+
+# RFC 9727 API catalog (extensionless); also publishes /openapi.json.
+[outputFormats.apicatalog]
+  mediaType = "application/linkset+json"
+  baseName = "api-catalog"
+  path = ".well-known"
+  isPlainText = true
+  notAlternative = true
+  permalinkable = true
+
+[outputFormats.poppy]
+  mediaType = "application/json"
+  baseName = "poppy"
+  path = ".well-known"
+  isPlainText = true
+  notAlternative = true
+  permalinkable = true
+
 [outputs]
-  home = ["html", "rss", "json", "llms", "llmsfull", "agentskills"]
+  home = ["html", "rss", "json", "llms", "llmsfull", "agentskills", "ard", "apicatalog", "poppy"]
   page = ["html", "markdown"]

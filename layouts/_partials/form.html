@@ -1,8 +1,8 @@
 {{- $action := "search/" | relLangURL -}}
 {{- with site.GetPage "/search" }}{{ $action = .RelPermalink }}{{ end -}}
 <div class="content-search">
-    <form action="{{ $action }}" method="get" role="search"> <label for="search">Search all content</label> <input type="search"
-            name="s" id="search" placeholder="Search all content" value="" autocomplete="off" required> <input type="submit"
+    <form action="{{ $action }}" method="get" role="search"{{ if ne site.Params.webmcp false }} toolname="open_search_results" tooldescription="Open the search results page for {{ site.Title }} for a word or phrase."{{ end }}> <label for="search">Search all content</label> <input type="search"
+            name="s" id="search" placeholder="Search all content" value="" autocomplete="off" required{{ if ne site.Params.webmcp false }} toolparamdescription="The word or phrase to search for."{{ end }}> <input type="submit"
             value="Search">
     </form>
 </div>

@@ -1,0 +1,3 @@
+kind: Features
+body: Register WebMCP tools so agents in the browser can search the site (search_site) and read any page as Markdown (get_page_markdown), and mark up the search form with declarative WebMCP attributes. The script loads whenever the JSON search index is enabled and does nothing in browsers without WebMCP; set params.webmcp = false to leave it out.
+time: 2026-11-11T19:00:01.000000-06:00

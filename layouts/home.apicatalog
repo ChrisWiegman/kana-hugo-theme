@@ -1,0 +1,19 @@
+{{- /*
+  API catalog (RFC 9727) at /.well-known/api-catalog, a linkset (RFC 9264)
+  pointing to the site's read-only content API. Also publishes the OpenAPI
+  description it links to at /openapi.json. Serve it with
+  Content-Type: application/linkset+json.
+*/ -}}
+{{- $openapi := partial "discovery/openapi.html" . | jsonify (dict "indent" "  ") | resources.FromString "openapi.json" -}}
+{{- $doc := "" -}}
+{{- with site.Home.OutputFormats.Get "agentskills" -}}
+{{- $doc = (partial "discovery/skill.html" $).resource.Permalink -}}
+{{- else -}}
+{{- with site.Home.OutputFormats.Get "llms" }}{{ $doc = .Permalink }}{{ end -}}
+{{- end -}}
+{{- $entry := dict
+  "anchor" ("/" | absURL)
+  "service-desc" (slice (dict "href" $openapi.Permalink "type" "application/vnd.oai.openapi+json"))
+-}}
+{{- with $doc }}{{ $entry = merge $entry (dict "service-doc" (slice (dict "href" . "type" "text/markdown"))) }}{{ end -}}
+{{- dict "linkset" (slice $entry) | jsonify (dict "indent" "  ") -}}

@@ -1,0 +1,11 @@
+{{- /*
+  Renders the agent skill from assets/agent-skills/SKILL.md and returns a dict
+  with its name, description, and published resource. Shared by the Agent
+  Skills index and the ARD manifest so both point at the same file.
+*/ -}}
+{{- $cfg := site.Params.agentSkills | default dict -}}
+{{- $name := $cfg.name | default (site.Title | urlize | lower) -}}
+{{- $description := $cfg.description | default (printf "Read, search, and cite content from %s (%s): find pages and posts, fetch them as Markdown, and follow the site's content-use preferences." site.Title site.BaseURL) -}}
+{{- $target := printf ".well-known/agent-skills/%s/SKILL.md" $name -}}
+{{- $skill := resources.Get "agent-skills/SKILL.md" | resources.ExecuteAsTemplate $target (dict "name" $name "description" $description) -}}
+{{- return (dict "name" $name "description" $description "resource" $skill) -}}

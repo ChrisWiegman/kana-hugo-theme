@@ -1,3 +1,4 @@
+/* global window, document */
 const { createHash } = require('node:crypto');
 const { test, expect } = require('@playwright/test');
 
@@ -169,4 +170,116 @@ test('library JSON-LD lists books when jsonldBooks is enabled', async ({ request
 	expect(library.mainEntity.numberOfItems).toBeGreaterThan(0);
 	expect(first['@type']).toBe('Book');
 	expect(first.author.name).toBeTruthy();
+});
+
+test('ARD manifest lists the site resources at both well-known paths', async ({ request }) => {
+	const response = await request.get('/.well-known/ard.json');
+	const origin = new URL(response.url()).origin;
+	const host = new URL(response.url()).hostname;
+	const manifest = await response.json();
+	const legacy = await (await request.get('/.well-known/ai-catalog.json')).json();
+
+	expect(legacy).toEqual(manifest);
+	expect(manifest.specVersion).toBe('1.0');
+	expect(manifest.host).toEqual(expect.objectContaining({ displayName: 'Hugo Theme Development Site', identifier: host }));
+
+	const types = manifest.entries.map((e) => e.type);
+
+	expect(types).toEqual(['application/agent-skills+md', 'text/markdown', 'application/json', 'application/rss+xml', 'application/vnd.oai.openapi+json']);
+
+	for (const entry of manifest.entries) {
+		expect(entry.identifier.startsWith(`urn:air:${host}:`)).toBe(true);
+		expect(entry.identifier).toMatch(/:[a-z]+:[a-z0-9-]+$/);
+		expect(entry.displayName).toBeTruthy();
+		expect(entry.url.startsWith(`${origin}/`)).toBe(true);
+		expect(entry.data).toBeUndefined();
+		expect(entry.representativeQueries.length).toBeGreaterThanOrEqual(2);
+		expect(entry.representativeQueries.length).toBeLessThanOrEqual(5);
+	}
+});
+
+test('API catalog links to an OpenAPI description of the static endpoints', async ({ request }) => {
+	const response = await request.get('/.well-known/api-catalog');
+	const origin = new URL(response.url()).origin;
+	const catalog = JSON.parse(await response.text());
+	const [entry] = catalog.linkset;
+
+	expect(catalog.linkset).toHaveLength(1);
+	expect(entry.anchor).toBe(`${origin}/`);
+	expect(entry['service-desc'][0]).toEqual({ href: `${origin}/openapi.json`, type: 'application/vnd.oai.openapi+json' });
+	expect(entry['service-doc'][0].href).toMatch(/\/\.well-known\/agent-skills\/hugo-theme-development-site\/SKILL\.md$/);
+
+	const openapi = await (await request.get('/openapi.json')).json();
+
+	expect(openapi.openapi).toBe('3.1.0');
+	expect(openapi.security).toEqual([]);
+	expect(Object.keys(openapi.paths)).toEqual(expect.arrayContaining(['/index.json', '/{pagePath}index.md', '/llms.txt', '/index.xml', '/sitemap.xml']));
+});
+
+test('Poppy manifest declares a website-only organization', async ({ request }) => {
+	const response = await request.get('/.well-known/poppy.json');
+	const poppy = await response.json();
+
+	expect(poppy).toEqual({
+		protocol_version: '0.1',
+		organization: { name: 'Hugo Theme Development Site', domain: new URL(response.url()).hostname },
+		web: {},
+	});
+});
+
+test('robots.txt and the home page head point to the discovery manifests', async ({ page, request }) => {
+	const robots = await (await request.get('/robots.txt')).text();
+
+	expect(robots).toMatch(/^Agentmap: \S+\/\.well-known\/ard\.json$/m);
+
+	await page.goto('/');
+
+	await expect(page.locator('head link[rel="ard"]')).toHaveAttribute('href', /\/\.well-known\/ard\.json$/);
+	await expect(page.locator('head link[rel="ai-catalog"]')).toHaveAttribute('href', /\/\.well-known\/ai-catalog\.json$/);
+	await expect(page.locator('head link[rel="api-catalog"]')).toHaveAttribute('href', /\/\.well-known\/api-catalog$/);
+
+	await page.goto('/2026/01/hugo-development-post/');
+
+	await expect(page.locator('head link[rel="ard"]')).toHaveCount(0);
+});
+
+test('WebMCP tools search the site and read pages as Markdown', async ({ page }) => {
+	await page.addInitScript(() => {
+		window.registeredTools = {};
+		document.modelContext = {
+			registerTool(tool) {
+				window.registeredTools[tool.name] = tool;
+
+				return Promise.resolve();
+			},
+		};
+	});
+
+	await page.goto('/');
+	await page.waitForFunction(() => Object.keys(window.registeredTools).length === 2);
+
+	const search = await page.evaluate(() => window.registeredTools.search_site.execute({ query: 'Hugo Development Post', limit: 2 }));
+
+	expect(search.results.length).toBeGreaterThan(0);
+	expect(search.results.length).toBeLessThanOrEqual(2);
+	expect(search.results[0].title).toMatch(/Hugo Development Post/);
+	expect(search.results[0].markdownUrl).toMatch(/\/index\.md$/);
+
+	const markdown = await page.evaluate((url) => window.registeredTools.get_page_markdown.execute({ url }), search.results[0].url);
+
+	expect(markdown).toMatch(/^---\ntitle: "Hugo Development Post/);
+
+	const offsite = await page.evaluate(() => window.registeredTools.get_page_markdown.execute({ url: 'https://example.com/' }).then(() => 'resolved', (e) => e.message));
+
+	expect(offsite).toMatch(/Only pages on/);
+});
+
+test('the search form is exposed as a declarative WebMCP tool', async ({ page }) => {
+	await page.goto('/blog/');
+
+	const form = page.locator('form[role="search"]');
+
+	await expect(form).toHaveAttribute('toolname', 'open_search_results');
+	await expect(form).toHaveAttribute('tooldescription', /Hugo Theme Development Site/);
+	await expect(form.locator('input[name="s"]')).toHaveAttribute('toolparamdescription', /.+/);
 });
