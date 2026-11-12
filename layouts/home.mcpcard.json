@@ -1,7 +1,7 @@
 {{- /*
   MCP Server Card (SEP-2127, https://github.com/modelcontextprotocol/experimental-ext-server-card)
   at /.well-known/mcp/server-card.json for the read-only MCP server in
-  workers/mcp.mjs, which must be deployed at /mcp. The Worker reads its name,
+  workers/agents.mjs, which must be deployed at /mcp. The Worker reads its name,
   title, and version from this file and also serves it at /mcp/server-card.
   serverInfo, transport, and capabilities repeat the same facts in the shape
   older consumers and scanners look for.

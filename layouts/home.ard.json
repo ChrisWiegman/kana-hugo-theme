@@ -102,6 +102,21 @@
 ) -}}
 {{- end -}}
 
+{{- with $home.OutputFormats.Get "agentcard" -}}
+{{- $entries = $entries | append (dict
+  "identifier" (printf "urn:air:%s:a2a:site" $host)
+  "displayName" (printf "%s A2A agent" $title)
+  "type" "application/a2a-agent-card+json"
+  "url" .Permalink
+  "capabilities" (slice "search" "recent" "read")
+  "description" (printf "A read-only A2A agent at %s that searches %s, lists recent posts, and returns pages as Markdown." ("a2a" | absURL) $title)
+  "representativeQueries" (slice
+    (printf "ask %s about a topic" $title)
+    (printf "get the newest posts from %s" $title)
+  )
+) -}}
+{{- end -}}
+
 {{- range $cfg.entries }}{{ $entries = $entries | append . }}{{ end -}}
 
 {{- $hostInfo := dict "displayName" $title "identifier" $host -}}

@@ -23,6 +23,9 @@ description: {{ .description }}
 {{ with $home.OutputFormats.Get "mcpcard" -}}
 If you can use MCP, connect to the read-only MCP server at {{ "mcp" | absURL }} (Streamable HTTP, no sign-in). Its `search_site`, `list_recent_posts`, and `get_page` tools do everything below for you.
 
+{{ end -}}{{ with $home.OutputFormats.Get "agentcard" -}}
+If you speak A2A, the agent at {{ "a2a" | absURL }} ([agent card]({{ .Permalink }})) does the same: send it words to search for, "recent posts", or a page URL.
+
 {{ end -}}
 ## Read a page
 

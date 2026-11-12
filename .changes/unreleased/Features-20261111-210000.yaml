@@ -1,0 +1,3 @@
+kind: Features
+body: Add a read-only A2A agent at /a2a to the Worker, now workers/agents.mjs (workers/mcp.mjs still works). It speaks the JSON-RPC binding for A2A 1.0 and 0.3, replies to each message at once with search results, recent posts, or a page as Markdown, and keeps no tasks. Add an "agentcard" output that publishes its Agent Card at /.well-known/agent-card.json and lists it in the ARD manifest and agent skill. Route /a2a to the Worker with assets.run_worker_first.
+time: 2026-11-11T21:00:00.000000-06:00

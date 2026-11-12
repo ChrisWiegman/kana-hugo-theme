@@ -1,0 +1,63 @@
+{{- /*
+  A2A Agent Card (https://a2a-protocol.org) at /.well-known/agent-card.json
+  for the read-only A2A agent in workers/agents.mjs, which must be deployed
+  at /a2a. It declares protocol 1.0 and, for older clients, 0.3 (url,
+  preferredTransport, protocolVersion) at the same endpoint.
+*/ -}}
+{{- $cfg := site.Params.a2a | default dict -}}
+{{- $endpoint := "a2a" | absURL -}}
+{{- $title := site.Title -}}
+{{- $doc := "" -}}
+{{- with site.Home.OutputFormats.Get "agentskills" -}}
+{{- $doc = (partial "discovery/skill.html" $).resource.Permalink -}}
+{{- else -}}
+{{- with site.Home.OutputFormats.Get "llms" }}{{ $doc = .Permalink }}{{ end -}}
+{{- end -}}
+{{- $skills := slice
+  (dict
+    "id" "search"
+    "name" "Search the site"
+    "description" (printf "Finds posts and pages on %s whose title, text, tags, or categories contain the words you send. Replies with a Markdown list of links and the same results as JSON. This is keyword matching, not a conversational agent." $title)
+    "tags" (slice "search" "blog" "content")
+    "examples" (slice "hugo themes" "{\"skill\": \"search\", \"query\": \"wordpress\", \"limit\": 5}")
+    "inputModes" (slice "text/plain" "application/json")
+    "outputModes" (slice "text/plain" "application/json")
+  )
+  (dict
+    "id" "recent"
+    "name" "Recent posts"
+    "description" (printf "Lists the newest posts on %s. Send \"recent posts\" or a data part with {\"skill\": \"recent\"}." $title)
+    "tags" (slice "latest" "feed" "blog")
+    "examples" (slice "recent posts" "{\"skill\": \"recent\", \"limit\": 5}")
+    "inputModes" (slice "text/plain" "application/json")
+    "outputModes" (slice "text/plain" "application/json")
+  )
+  (dict
+    "id" "read"
+    "name" "Read a page"
+    "description" (printf "Returns a page on %s as Markdown, with front matter giving its title, canonical URL, dates, and tags. Send the page's URL or path." $title)
+    "tags" (slice "read" "markdown" "content")
+    "examples" (slice ("/about/" | absURL) "{\"skill\": \"read\", \"url\": \"/about/\"}")
+    "inputModes" (slice "text/plain" "application/json")
+    "outputModes" (slice "text/markdown")
+  )
+-}}
+{{- $card := dict
+  "name" $title
+  "description" ($cfg.description | default (printf "A read-only agent for %s: send it words to search for, \"recent posts\", or a page URL, and it replies at once with links or the page as Markdown. No sign-in." $title))
+  "version" ($cfg.version | default "1.0.0")
+  "supportedInterfaces" (slice
+    (dict "url" $endpoint "protocolBinding" "JSONRPC" "protocolVersion" "1.0")
+    (dict "url" $endpoint "protocolBinding" "JSONRPC" "protocolVersion" "0.3")
+  )
+  "url" $endpoint
+  "preferredTransport" "JSONRPC"
+  "protocolVersion" "0.3"
+  "provider" (dict "organization" (site.Params.author | default $title) "url" ("/" | absURL))
+  "capabilities" (dict "streaming" false "pushNotifications" false "extendedAgentCard" false)
+  "defaultInputModes" (slice "text/plain" "application/json")
+  "defaultOutputModes" (slice "text/plain" "text/markdown" "application/json")
+  "skills" $skills
+-}}
+{{- with $doc }}{{ $card = merge $card (dict "documentationUrl" .) }}{{ end -}}
+{{- $card | jsonify (dict "indent" "  ") -}}

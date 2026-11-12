@@ -123,7 +123,7 @@ posts = "/:year/:month/:slug/"
 limit = 30
 
 [outputs]
-home = ["HTML", "RSS", "JSON", "markdown", "llms", "llmsfull", "agentskills", "ard", "apicatalog", "poppy", "mcpcard"]
+home = ["HTML", "RSS", "JSON", "markdown", "llms", "llmsfull", "agentskills", "ard", "apicatalog", "poppy", "mcpcard", "agentcard"]
 page = ["HTML", "markdown"]
 section = ["html"]
 taxonomy = ["html"]

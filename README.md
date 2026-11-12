@@ -63,11 +63,11 @@ mainSections = ["posts"]
 description  = "Your site description"
 
 [outputs]
-home = ["HTML", "RSS", "JSON", "markdown", "llms", "llmsfull", "agentskills", "ard", "apicatalog", "poppy", "mcpcard"]
+home = ["HTML", "RSS", "JSON", "markdown", "llms", "llmsfull", "agentskills", "ard", "apicatalog", "poppy", "mcpcard", "agentcard"]
 page = ["HTML", "markdown"]
 ```
 
-The `JSON` output on `home` is required for client-side search to work. The `llms`, `llmsfull`, `agentskills`, `ard`, `apicatalog`, `poppy`, `mcpcard`, and `markdown` outputs are optional; see [AI and Agent Discovery](#ai-and-agent-discovery). The theme defines these output formats, but Hugo doesn't merge `[outputs]` from themes, so a site that sets its own `[outputs]` must list them itself.
+The `JSON` output on `home` is required for client-side search to work. The `llms`, `llmsfull`, `agentskills`, `ard`, `apicatalog`, `poppy`, `mcpcard`, `agentcard`, and `markdown` outputs are optional; see [AI and Agent Discovery](#ai-and-agent-discovery). The theme defines these output formats, but Hugo doesn't merge `[outputs]` from themes, so a site that sets its own `[outputs]` must list them itself.
 
 ### Theme Parameters
 
@@ -287,7 +287,7 @@ Only set `markdownNegotiation` if your host actually serves `index.md` for `Acce
 
 ### Agentic Resource Discovery manifest
 
-Add `"ard"` to `outputs.home` to publish an [ARD](https://agenticresourcediscovery.org) manifest at `/.well-known/ard.json`, plus an identical copy at the predecessor path `/.well-known/ai-catalog.json` that older consumers and scanners look for. It lists the machine-readable resources the site publishes: the agent skill, llms.txt, the JSON search index, the RSS feed, the OpenAPI description, and the MCP server, each only when its output is enabled. Each entry gets a `urn:air:<domain>:<namespace>:<name>` identifier and a few sample queries. `robots.txt` gets an `Agentmap:` line, and the home page gets `<link rel="ard">` and `<link rel="ai-catalog">`.
+Add `"ard"` to `outputs.home` to publish an [ARD](https://agenticresourcediscovery.org) manifest at `/.well-known/ard.json`, plus an identical copy at the predecessor path `/.well-known/ai-catalog.json` that older consumers and scanners look for. It lists the machine-readable resources the site publishes: the agent skill, llms.txt, the JSON search index, the RSS feed, the OpenAPI description, the MCP server, and the A2A agent, each only when its output is enabled. Each entry gets a `urn:air:<domain>:<namespace>:<name>` identifier and a few sample queries. `robots.txt` gets an `Agentmap:` line, and the home page gets `<link rel="ard">` and `<link rel="ai-catalog">`.
 
 List any other resources (an MCP server card, say) in `params.ard.entries`; each is added to the manifest as written:
 
@@ -308,34 +308,43 @@ Add `"apicatalog"` to `outputs.home` to publish an [RFC 9727](https://www.rfc-ed
 
 The catalog file has no extension, so your host must serve it as `application/linkset+json`.
 
-### MCP server (Cloudflare Workers)
+### MCP server and A2A agent (Cloudflare Workers)
 
-`workers/mcp.mjs` is a small, read-only [MCP](https://modelcontextprotocol.io) server for sites hosted on Cloudflare Workers. It speaks Streamable HTTP at `/mcp` (stateless, JSON responses, no sign-in) and offers three tools, all answered from files Hugo already publishes:
+`workers/agents.mjs` gives sites hosted on Cloudflare Workers two small, read-only agent endpoints, both answered from files Hugo already publishes and both without sign-in:
+
+- An [MCP](https://modelcontextprotocol.io) server at `/mcp` (Streamable HTTP, stateless, JSON responses).
+- An [A2A](https://a2a-protocol.org) agent at `/a2a` (JSON-RPC binding, protocol 1.0 and 0.3). It replies to each message at once and keeps no tasks: send words to search for, "recent posts", or a page URL, or a data part such as `{"skill": "search", "query": "hugo", "limit": 5}`. It's keyword matching, not a conversational agent, and its card says so.
+
+The MCP tools:
 
 - **`search_site`**: searches the JSON search index.
 - **`list_recent_posts`**: the newest posts from the search index.
 - **`get_page`**: any page on the site as Markdown (needs the `markdown` page output).
 
-Point your Worker at it and send only `/mcp` requests to it, so every other request is still served as a static file without running the Worker:
+Point your Worker at it and send only those paths to it, so every other request is still served as a static file without running the Worker:
 
 ```jsonc
 // wrangler.jsonc
 {
-  "main": "themes/kana-hugo-theme/workers/mcp.mjs",
+  "main": "themes/kana-hugo-theme/workers/agents.mjs",
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "run_worker_first": ["/mcp", "/mcp/*"]
+    "run_worker_first": ["/mcp", "/mcp/*", "/a2a"]
   }
 }
 ```
 
-Then add `"mcpcard"` to `outputs.home` to publish its [MCP Server Card](https://github.com/modelcontextprotocol/experimental-ext-server-card) at `/.well-known/mcp/server-card.json`. The Worker also serves the card at `/mcp/server-card` and takes its name, title, and version from it. The ARD manifest and the agent skill list the server once the card is enabled. Only enable `mcpcard` with the Worker deployed.
+Then add `"mcpcard"` to `outputs.home` to publish its [MCP Server Card](https://github.com/modelcontextprotocol/experimental-ext-server-card) at `/.well-known/mcp/server-card.json`. The Worker also serves the card at `/mcp/server-card` and takes its name, title, and version from it. Add `"agentcard"` to publish the A2A Agent Card at `/.well-known/agent-card.json`. The ARD manifest and the agent skill list each endpoint once its card is enabled. Only enable the cards with the Worker deployed.
 
 ```toml
 [params.mcp]
 name        = "com.example/site"   # reverse-DNS server name (default: from the site's domain)
 version     = "1.0.0"              # default 1.0.0
+description = "..."                # default: generated from the site title
+
+[params.a2a]
+version     = "1.0.0"              # agent version (default 1.0.0)
 description = "..."                # default: generated from the site title
 ```
 
@@ -377,6 +386,10 @@ Static hosts serve files by extension, so set these headers yourself. For Cloudf
 /.well-known/mcp/server-card.json
   Content-Type: application/mcp-server-card+json
   Access-Control-Allow-Origin: *
+
+/.well-known/agent-card.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
 ```
 
 ### robots.txt AI rules
@@ -525,6 +538,7 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 │   ├── home.agentskills.json # Agent Skills discovery index
 │   ├── home.apicatalog     # RFC 9727 API catalog (and /openapi.json)
 │   ├── home.ard.json       # ARD manifest (and ai-catalog.json)
+│   ├── home.agentcard.json # A2A Agent Card
 │   ├── home.mcpcard.json   # MCP Server Card
 │   ├── home.poppy.json     # Personal Agent Protocol declaration
 │   ├── home.llms.txt       # llms.txt
@@ -541,7 +555,7 @@ Regenerates `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600) 
 ├── scripts/
 │   └── screenshots.mjs     # screenshot generation script
 └── workers/
-    └── mcp.mjs             # read-only MCP server for Cloudflare Workers
+    └── agents.mjs          # read-only MCP server and A2A agent for Cloudflare Workers
 ```
 
 ## Formatting
