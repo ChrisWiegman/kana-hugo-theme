@@ -1,3 +1,0 @@
-kind: Features
-body: Load an optional site stylesheet. A site that adds assets/scss/site.scss gets it compiled, fingerprinted, and linked on every page after the theme's styles, so it can style its own content without inline style attributes and keep a strict style-src 'self' Content Security Policy.
-time: 2026-11-11T22:00:00.000000-06:00
